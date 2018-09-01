@@ -15,6 +15,12 @@ class DataStore:
         self.conn = conn
         self.cursor = conn.cursor()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        return self.close()
+
     @staticmethod
     def _table_pre() -> str:
         return "app_entries_"
@@ -29,12 +35,15 @@ class DataStore:
 
         :return: DB cursor
         """
-
-        return psycopg2.connect("dbname='dms' user='root' password='root' host='0.0.0.0' port='5432'")
+        return psycopg2.connect("dbname='dms' user='root' password='root' host='postgres' port='5432'")
 
     def close(self):
-        self.cursor.close()
-        self.conn.close()
+        try:
+            self.cursor.close()
+            self.conn.close()
+            return True
+        except Exception as e:
+            return False
 
     def create_app(self, app_id: str, description=""):
         self.cursor.execute(

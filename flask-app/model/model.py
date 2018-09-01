@@ -10,6 +10,14 @@ class App:
     def from_tuple(t):
         return App(t[0], t[1], t[2])
 
+    def json(self) -> dict:
+        #TODO: test this
+        return {
+            "id": self.app_id,
+            "description": self.description,
+            "created": str(self.created)
+        }
+
 
 class Entry:
 
@@ -20,3 +28,10 @@ class Entry:
     @staticmethod
     def from_tuple(t):
         return Entry(t[0], t[1])
+
+    def json(self) -> dict:
+        # TODO: test this
+        return {
+            "data": self.data,
+            "created": self.created
+        }
