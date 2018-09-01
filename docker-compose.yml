@@ -1,0 +1,23 @@
+version: "2"
+services:
+  app:
+    build: ./app
+    links:
+      - db
+    ports:
+      - "5000:5000"
+
+  db:
+    image: postgres
+    restart: always
+    ports:
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: 'root'
+      POSTGRES_PASSWORD: 'root'
+      POSTGRES_DB: 'dms_db'
+    volumes:
+    - ./db:/docker-entrypoint-initdb.d #/:ro
+
+
+#"dbname='dms' user='root' password='root' host='0.0.0.0' port='5432'"
