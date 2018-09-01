@@ -16,9 +16,11 @@ COPY requirements.txt /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Run app.py when the container launches
+# Run dms.py when the container launches
 COPY app.py /app
+COPY data /app/data
+COPY model /app/model
 CMD python app.py
 
 #ENTRYPOINT [ "python" ]
-#CMD [ "app.py" ]
+#CMD [ "dms.py" ]
