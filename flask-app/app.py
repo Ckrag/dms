@@ -4,6 +4,7 @@ import json
 
 from flask import Flask
 from flask import request
+from flask import abort
 
 from data.data_store import DataStore
 
@@ -24,18 +25,18 @@ def receive_data(app_id: str) -> str or int:
         app_obj = db.get_app(app_id)
         entry_data = request.data
         if not entry_data:
-            return 400
+            abort(400)
 
         if not app_obj:
             db.create_app(app_id)
 
         if request.content_type == _JSON:
-            db.add_app_entry(app_id, request.data)
-            return 200
+            db.add_app_entry(app_id, request.data.decode("utf-8"))
+            return "yay!"
         elif request.content_type == _BINARY:
-            return 501
+            abort(501)
         else:
-            return 400
+            abort(400)
 
 
 @app.route('/apps', methods=['GET'])
