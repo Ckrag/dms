@@ -22,7 +22,7 @@ def receive_data(app_id: str) -> str or int:
     rsp = DMS.on_data_received(app_id, request.data.decode("utf-8"), request.content_type)
 
     if rsp >= 400:
-        abort(400)
+        abort(rsp)
     else:
         return "All good :D"  # 200
 
