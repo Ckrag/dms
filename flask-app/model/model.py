@@ -1,4 +1,3 @@
-
 class App:
 
     def __init__(self, app_id, description, created):

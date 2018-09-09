@@ -1,8 +1,6 @@
 import unittest
-import psycopg2
+from test import db
 import datetime
-
-from data.data_store import DataStore
 from model.model import App
 
 
@@ -11,7 +9,7 @@ class DBTest(unittest.TestCase):
 
     def test_create_delete_app(self):
 
-        database = DBTest.get_database()
+        database = db.get_database()
 
         self.assertEqual([], database.get_apps())
 
@@ -45,7 +43,7 @@ class DBTest(unittest.TestCase):
         database.close()
 
     def test_create_app_and_write_data_entry(self):
-        database = DBTest.get_database()
+        database = db.get_database()
         app_name = "my_app"
         app_data = "My dms data :D"
         database.create_app(app_name, "really cool dms!")
@@ -54,14 +52,6 @@ class DBTest(unittest.TestCase):
         self.assertEqual(1, len(database.get_app_entries(app_name)))
         self.assertEqual(app_data, database.get_app_entries(app_name)[0].data)
         database.close()
-
-    @staticmethod
-    def get_database():
-        return DataStore(DBTest.get_db_connection())
-
-    @staticmethod
-    def get_db_connection() -> psycopg2.connect:
-        return psycopg2.connect("dbname='dms' user='root' password='root' host='0.0.0.0' port='5432'")
 
 
 if __name__ == '__main__':

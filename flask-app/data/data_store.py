@@ -7,7 +7,7 @@ from model.model import App, Entry
 
 class DataStore:
     """
-    Cool annotations!
+    Cool, annotations!
     https://www.python.org/dev/peps/pep-3107/
     """
 
@@ -22,12 +22,12 @@ class DataStore:
         return self.close()
 
     @staticmethod
-    def get_db_connection() -> psycopg2.connect:
+    def get_db_connection(config: str) -> psycopg2.connect:
         """
 
         :return: DB cursor
         """
-        return psycopg2.connect("dbname='dms' user='root' password='root' host='postgres' port='5432'")
+        return psycopg2.connect(config)
 
     def close(self):
         try:

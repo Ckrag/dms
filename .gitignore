@@ -5,6 +5,7 @@ flask-app/.idea
 flask-app/*/__pycache__
 flask-app/__pycache__/
 .pyc
+.pytest_cache
 
 # User-specific stuff
 .idea/**/workspace.xml
