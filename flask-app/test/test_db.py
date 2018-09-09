@@ -19,8 +19,10 @@ class DBTest(unittest.TestCase):
         app_name_two = "my_second_app"
 
         database.create_app(app_name_one, "This dms is great!")
+        self.assertTrue(database.get_apps())
 
-        self.assertTrue(DBTest.table_exists(database.cursor, database._table_pre() + app_name_one))
+        database.add_app_entry(app_name_one, "my first entry")
+        self.assertTrue(database.get_app_entries(app_name_one))
 
         self.assertEqual(1, len(database.get_apps()))
 
@@ -38,7 +40,7 @@ class DBTest(unittest.TestCase):
 
         self.assertEqual(0, len(database.get_apps()))
 
-        self.assertTrue(not DBTest.table_exists(database.cursor, database._table_pre() + app_name_one))
+        self.assertFalse(database.get_app_entries(app_name_one))
 
         database.close()
 
@@ -55,16 +57,11 @@ class DBTest(unittest.TestCase):
 
     @staticmethod
     def get_database():
-        return DataStore(psycopg2.connect("dbname='dms' user='root' password='root' host='0.0.0.0' port='5432'"))
+        return DataStore(DBTest.get_db_connection())
 
     @staticmethod
-    def table_exists(cursor, table_name):
-        cursor.execute("SELECT * FROM pg_catalog.pg_tables;")
-        has_table = False
-        for tuple in cursor.fetchall():
-            if table_name in tuple:
-                has_table = True
-        return has_table
+    def get_db_connection() -> psycopg2.connect:
+        return psycopg2.connect("dbname='dms' user='root' password='root' host='0.0.0.0' port='5432'")
 
 
 if __name__ == '__main__':
