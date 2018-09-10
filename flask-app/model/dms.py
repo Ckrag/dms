@@ -37,3 +37,14 @@ class DMS:
         with db:
             apps = list(map(lambda x: x.json(), db.get_apps()))
             return json.dumps(apps)
+
+    def on_entries_requested(self, app_id: str) -> str:
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        with db:
+            return json.dumps(list(map(lambda x: x.json(), db.get_app_entries(app_id))))
+
+    def on_app_delete(self, app_id: str) -> int:
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        with db:
+            db.delete_app(app_id)
+            return 204

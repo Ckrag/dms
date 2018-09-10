@@ -33,5 +33,5 @@ class Entry:
         # TODO: test this
         return {
             "data": self.data,
-            "created": self.created
+            "created": str(self.created)
         }

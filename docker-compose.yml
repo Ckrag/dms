@@ -20,4 +20,5 @@ services:
       POSTGRES_PASSWORD: 'root'
       POSTGRES_DB: 'dms_db'
     volumes:
-    - ./db:/docker-entrypoint-initdb.d #/:ro
+    #- /var/lib/postgresql/data
+    - ./db:/docker-entrypoint-initdb.d/:ro

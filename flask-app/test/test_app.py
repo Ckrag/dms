@@ -38,3 +38,11 @@ class DBTest(unittest.TestCase):
         self.assertEqual(200, dms.on_data_received(app_name, app_entry, accept_type))
 
         self.assertTrue(len(dms.on_apps_requested()) > 2)
+
+        self.assertTrue(len(dms.on_entries_requested(app_name)) > 2)
+
+        dms.on_app_delete(app_name)
+
+        self.assertTrue(len(dms.on_apps_requested()) == 2)
+
+        self.assertTrue(len(dms.on_entries_requested(app_name)) == 2)

@@ -3,6 +3,7 @@
 from flask import Flask
 from flask import abort
 from flask import request
+from flask import make_response
 
 from model.dms import DMS as DMS_APPLICATION
 
@@ -27,9 +28,20 @@ def receive_data(app_id: str) -> str or int:
         return "All good :D"  # 200
 
 
+@app.route('/entries/<string:app_id>', methods=['GET'])
+def show_entries(app_id: str):
+    resp = make_response(DMS.on_entries_requested(app_id))
+    resp.headers['Content-Type'] = 'application/json'
+    resp.headers['charset'] = 'utf-8'
+    return resp
+
+
 @app.route('/apps', methods=['GET'])
-def show_apps() -> str:
-    return DMS.on_apps_requested()
+def show_apps():
+    resp = make_response(DMS.on_apps_requested())
+    resp.headers['Content-Type'] = 'application/json'
+    resp.headers['charset'] = 'utf-8'
+    return resp
 
 
 if __name__ == '__main__':
