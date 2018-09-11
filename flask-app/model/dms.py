@@ -15,9 +15,6 @@ class DMS:
 
     def on_data_received(self, app_id: str, payload: str, accept_type: str) -> int:
 
-        # lowercase the ID
-        app_id = app_id.lower()
-
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         with db:
             app_obj = db.get_app(app_id)

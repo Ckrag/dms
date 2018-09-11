@@ -41,7 +41,7 @@ class DBTest(unittest.TestCase):
 
         self.assertTrue(len(dms.on_entries_requested(app_name)) > 2)
 
-        dms.on_app_delete(app_name)
+        dms.on_app_delete(app_name.upper()) # Uppercase to test we don't differ on case
 
         self.assertTrue(len(dms.on_apps_requested()) == 2)
 

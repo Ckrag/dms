@@ -20,16 +20,28 @@ DMS = DMS_APPLICATION()
 
 @app.route('/app/<string:app_id>', methods=['POST'])
 def receive_data(app_id: str) -> str or int:
+    app_id = app_id.lower()
+
     rsp = DMS.on_data_received(app_id, request.data.decode("utf-8"), request.content_type)
 
     if rsp >= 400:
         abort(rsp)
     else:
-        return "All good :D"  # 200
+        return "{} entry added".format(app_id)  # 200
+
+
+@app.route('/app/<string:app_id>', methods=['DELETE'])
+def delete_app(app_id: str) -> str or int:
+    app_id = app_id.lower()
+
+    DMS.on_app_delete(app_id)
+    return "{} Deleted".format(app_id)  # 200
 
 
 @app.route('/entries/<string:app_id>', methods=['GET'])
 def show_entries(app_id: str):
+    app_id = app_id.lower()
+
     resp = make_response(DMS.on_entries_requested(app_id))
     resp.headers['Content-Type'] = 'application/json'
     resp.headers['charset'] = 'utf-8'
