@@ -6,6 +6,7 @@ class DMS:
 
     # TODO: Move to own script
 
+    _TEXT = "Text"
     _JSON = "application/json"
     _BINARY = "multipart/form-data "
 
@@ -13,6 +14,9 @@ class DMS:
         self._db_conn_str = db_connect_str
 
     def on_data_received(self, app_id: str, payload: str, accept_type: str) -> int:
+
+        # lowercase the ID
+        app_id = app_id.lower()
 
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         with db:
@@ -24,13 +28,12 @@ class DMS:
             if not app_obj:
                 db.create_app(app_id)
 
-            if accept_type == self._JSON:
-                db.add_app_entry(app_id, entry_data)
-                return 200
-            elif accept_type== self._BINARY:
+            # Either its binary or its text, we don't care for anything else when it comes to storage
+            if accept_type == self._BINARY:
                 return 501
             else:
-                return 400
+                db.add_app_entry(app_id, entry_data)
+                return 200
 
     def on_apps_requested(self) -> str:
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
