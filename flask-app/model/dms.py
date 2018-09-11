@@ -38,6 +38,15 @@ class DMS:
             apps = list(map(lambda x: x.json(), db.get_apps()))
             return json.dumps(apps)
 
+    def on_app_requested(self, app_id) -> str or int:
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        with db:
+            app = db.get_app(app_id)
+            if app:
+                return json.dumps(app.json())
+            else:
+                return 404
+
     def on_entries_requested(self, app_id: str) -> str:
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         with db:

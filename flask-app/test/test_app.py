@@ -33,7 +33,9 @@ class DBTest(unittest.TestCase):
 
         accept_type = dms._JSON
 
-        self.assertTrue(len(dms.on_apps_requested()) == 2)  # '[]'
+        self.assertEqual(len(dms.on_apps_requested()), 2)  # '[]'
+
+        self.assertEqual(dms.on_app_requested(app_name), 404)
 
         self.assertEqual(200, dms.on_data_received(app_name, app_entry, accept_type))
 
@@ -41,8 +43,12 @@ class DBTest(unittest.TestCase):
 
         self.assertTrue(len(dms.on_entries_requested(app_name)) > 2)
 
-        dms.on_app_delete(app_name.upper()) # Uppercase to test we don't differ on case
+        self.assertNotEqual(dms.on_app_requested(app_name), 404)
 
-        self.assertTrue(len(dms.on_apps_requested()) == 2)
+        dms.on_app_delete(app_name) # Uppercase to test we don't differ on case
 
-        self.assertTrue(len(dms.on_entries_requested(app_name)) == 2)
+        self.assertEqual(len(dms.on_apps_requested()), 2)
+
+        self.assertEqual(len(dms.on_entries_requested(app_name)), 2)
+
+        self.assertEqual(dms.on_app_requested(app_name), 404)

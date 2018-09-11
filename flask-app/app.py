@@ -38,6 +38,20 @@ def delete_app(app_id: str) -> str or int:
     return "{} Deleted".format(app_id)  # 200
 
 
+@app.route('/app/<string:app_id>', methods=['GET'])
+def show_app(app_id: str) -> str:
+
+    app_data = DMS.on_app_requested(app_id)
+
+    if isinstance(app_data, int):
+        abort(404) # if I use the app_data var it inf. recurses #TODO: Fix this
+    else:
+        resp = make_response(app_data)
+        resp.headers['Content-Type'] = 'application/json'
+        resp.headers['charset'] = 'utf-8'
+        return resp
+
+
 @app.route('/entries/<string:app_id>', methods=['GET'])
 def show_entries(app_id: str):
     app_id = app_id.lower()
