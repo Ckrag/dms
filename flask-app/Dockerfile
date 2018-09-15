@@ -20,7 +20,7 @@ RUN pip install -r requirements.txt
 COPY app.py /app
 COPY data /app/data
 COPY model /app/model
-CMD python app.py
+#CMD python app.py
 
 #ENTRYPOINT [ "python" ]
 #CMD [ "dms.py" ]

@@ -1,7 +1,8 @@
-version: "2"
+version: "3"
 services:
-  app:
+  dms_server:
     build: flask-app
+    command: python app.py
     links:
       - db
     ports:
@@ -9,12 +10,28 @@ services:
     depends_on:
       - db
 
+  django_db:
+    image: postgres
+    restart: always
+  dms_admin:
+    build: admin_site
+    command: python3 admin_site/manage.py runserver 0.0.0.0:8000
+    #command: django-admin runserver 0.0.0.0:8000
+    #command: ls admin_site/admin_site
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - django_db
+      - dms_server
+
   db:
-    container_name: "postgres"
+    #container_name: "postgres"
     image: postgres
     restart: always
     ports:
-    - "5432:5432"
+    - "5431:5432"
     environment:
       POSTGRES_USER: 'root'
       POSTGRES_PASSWORD: 'root'
