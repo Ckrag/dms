@@ -1,10 +1,37 @@
-{% if app_entry_list %}
-    <ul>
-    {% for entry in app_entry_list %}
-        <li>{{ entry }}</li>
-        <!--<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>-->
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No entries, sure the app exists?</p>
-{% endif %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>App Overview</title>
+
+        <script>
+            // Show all attributes as buttons
+            // 1) Structure as Json? Xml? use directly?
+            // 2) Select attribute based on choice of structure
+            // 3) Extract values from attributes (Fallback value?)
+            // 4) Plot to whatever
+            // On click link up that attribute
+
+            function parseEntry(strEntry, extractFunc){
+
+            }
+        </script>
+
+    </head>
+
+    <body>
+        {% if app_entry_list %}
+            <ul>
+            {% for entry in app_entry_list %}
+                <li>{{ entry }}</li>
+                <!--<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>-->
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No entries, sure the app exists?</p>
+        {% endif %}
+    </body>
+
+</html>
+
+
