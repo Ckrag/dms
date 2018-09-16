@@ -4,11 +4,11 @@ services:
     build: flask-app
     command: python app.py
     links:
-      - db
+      - flask_db
     ports:
       - "5000:5000"
     depends_on:
-      - db
+      - flask_db
 
   django_db:
     image: postgres
@@ -26,8 +26,8 @@ services:
       - django_db
       - dms_server
 
-  db:
-    #container_name: "postgres"
+  flask_db:
+    #container_name: "flask_db"
     image: postgres
     restart: always
     ports:

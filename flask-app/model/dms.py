@@ -10,7 +10,7 @@ class DMS:
     _JSON = "application/json"
     _BINARY = "multipart/form-data "
 
-    def __init__(self, db_connect_str: str = "dbname='dms' user='root' password='root' host='postgres' port='5432'"):
+    def __init__(self, db_connect_str: str = "dbname='dms' user='root' password='root' host='flask_db' port='5432'"):
         self._db_conn_str = db_connect_str
 
     def on_data_received(self, app_id: str, payload: str, accept_type: str) -> int:
