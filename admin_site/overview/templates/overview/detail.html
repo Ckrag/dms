@@ -1,0 +1,10 @@
+{% if app_entry_list %}
+    <ul>
+    {% for entry in app_entry_list %}
+        <li>{{ entry }}</li>
+        <!--<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>-->
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No entries, sure the app exists?</p>
+{% endif %}
