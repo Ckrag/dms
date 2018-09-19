@@ -12,7 +12,78 @@
             // 4) Plot to whatever
             // On click link up that attribute
 
-            function parseEntry(strEntry, extractFunc){
+            function mapRaw(raw, html_anchor){
+                html_anchor.innerHTML += "<button>" + raw + "</button><br>";
+            }
+
+            function mapJson(obj, html_anchor, path = []){
+                console.log("mapping data for " + html_anchor);
+                for (let key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if(isPrimitive(obj[key])){
+                            //path.push(key);
+                            let var_path = "";
+                            for(let p in path){
+                                var_path += "["+path[p]+"]";
+                            }
+                            //console.log(var_path + " = " + obj[key]);
+                            html_anchor.innerHTML += var_path + "<button>" + key + " (" + obj[key] + ")" + "</button><br>"
+                        } else {
+                            let new_path = path.slice();
+                            new_path.push(key);
+                            mapJson(obj[key], html_anchor, new_path);
+                        }
+                    }
+                }
+            }
+
+            var entries = [];
+
+            /**
+             * Good idea! https://stackoverflow.com/a/31538091
+             * @param test
+             * @returns {boolean}
+             */
+            function isPrimitive(test) {
+                return (test !== Object(test));
+            }
+            
+            function refresh() {
+                let container = document.getElementById("entries_container");
+                container.innerHTML = "";
+
+                let selection = document.querySelector('input[name="data_representation"]:checked').value;
+
+                switch (selection) {
+                    case "JSON":
+                        for(entry in entries){
+                            console.log("handling: " + entries[entry]);
+                            mapJson(JSON.parse(entries[entry]), container);
+                        }
+                        break;
+                    case "RAW":
+                        for(entry in entries){
+                            console.log("handling: " + entries[entry]);
+                            mapRaw(entries[entry], container);
+                        }
+                }
+            }
+
+            function test_stuff() {
+
+                var dict = {
+                    "blah": {
+                        "lol": 2,
+                        "tee": {
+                            "kal": {
+                                "lol": 4321
+                            }
+                        }
+                    },
+                    "bluh": "hej"
+                };
+
+                mapJson(dict);
 
             }
         </script>
@@ -23,13 +94,32 @@
         {% if app_entry_list %}
             <ul>
             {% for entry in app_entry_list %}
+
                 <li>{{ entry }}</li>
-                <!--<li><a href="/polls/{{ question.id }}/">{{ question.question_text }}</a></li>-->
             {% endfor %}
             </ul>
         {% else %}
             <p>No entries, sure the app exists?</p>
         {% endif %}
+
+        <p>============================</p>
+
+        <input type="radio" name="data_representation" value="JSON" checked>JSON<br>
+        <input type="radio" name="data_representation" value="RAW">RAW<br>
+        <button onclick="refresh()">Refresh!</button>
+
+        <p>============================</p>
+
+        <!-- Generate layout representation -->
+
+        <div id="entries_container"></div>
+        <script>
+            //let entry = "{{ entry }}";
+            let entry = "{\"blah\": {\"lol\": 2,\"tee\": {\"kal\": {\"lol\": 4321}}},\"bluh\": \"hej\"}";
+            entries.push(entry);
+        </script>
+
+
     </body>
 
 </html>
