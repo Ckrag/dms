@@ -37,7 +37,25 @@
                 }
             }
 
-            var entries = [];
+            function saveAppState(name_app, name_prop, path, onComplete){
+                // TODO THIS: Copy paste from: https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/send
+                let xhr = new XMLHttpRequest();
+                //Send the proper header information along with the request
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.open("POST", '/server', true);
+
+                xhr.onreadystatechange = function() {//Call a function when the state changes.
+                    if(this.readyState == XMLHttpRequest.DONE) {
+                        // Request finished. Do processing here.
+                        onComplete(this.status);
+                    }
+                };
+
+                xhr.send("app=" + name_app + "&prop=" + name_prop + "&path=" + path);
+            }
+
+            var entries = {{ app_entry_list|safe }};
 
             /**
              * Good idea! https://stackoverflow.com/a/31538091
@@ -54,53 +72,33 @@
 
                 let selection = document.querySelector('input[name="data_representation"]:checked').value;
 
+                console.log("refreshing for:");
+                console.log(entries.length);
+
                 switch (selection) {
                     case "JSON":
-                        for(entry in entries){
+                        for(let entry in entries){
                             console.log("handling: " + entries[entry]);
-                            mapJson(JSON.parse(entries[entry]), container);
+                            try{
+                                mapJson(JSON.parse(entries[entry]), container);
+                            } catch (e) {
+                                console.log("Unable to parse json:" + entries[entry])
+                            }
+
                         }
                         break;
                     case "RAW":
-                        for(entry in entries){
+                        for(let entry in entries){
                             console.log("handling: " + entries[entry]);
                             mapRaw(entries[entry], container);
                         }
                 }
-            }
-
-            function test_stuff() {
-
-                var dict = {
-                    "blah": {
-                        "lol": 2,
-                        "tee": {
-                            "kal": {
-                                "lol": 4321
-                            }
-                        }
-                    },
-                    "bluh": "hej"
-                };
-
-                mapJson(dict);
-
             }
         </script>
 
     </head>
 
     <body>
-        {% if app_entry_list %}
-            <ul>
-            {% for entry in app_entry_list %}
-
-                <li>{{ entry }}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No entries, sure the app exists?</p>
-        {% endif %}
 
         <p>============================</p>
 
@@ -113,13 +111,6 @@
         <!-- Generate layout representation -->
 
         <div id="entries_container"></div>
-        <script>
-            //let entry = "{{ entry }}";
-            let entry = "{\"blah\": {\"lol\": 2,\"tee\": {\"kal\": {\"lol\": 4321}}},\"bluh\": \"hej\"}";
-            entries.push(entry);
-        </script>
-
-
     </body>
 
 </html>
