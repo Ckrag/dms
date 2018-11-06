@@ -113,9 +113,43 @@
 
         <svg></svg>
         <script>
+
+            /**
+             * Takes the variable path to property and retrieves the value from that path of every object in the dataArr
+             * @param varPath
+             * @param dataArr
+             */
+            function getObjVals(varPath, dataArr){
+                let attrEntries = [];
+
+                let eval_path = "";
+                for(let i in varPath){
+                    eval_path += '[\'' + varPath[i] + '\']';
+                }
+
+                for(let i in dataArr){
+                    let entry = JSON.parse(dataArr[i]);
+
+                    let data = eval("entry"+eval_path);
+
+                    if(data != null){
+                        attrEntries.push(data);
+                    } else {
+                        console.log("null data found");
+                    }
+                }
+                return attrEntries;
+            }
+
+            function scaleData(graph_height, data){
+                let max = Math.max(...data);
+
+                return data.map(val => graph_height / max * val )
+            }
+
             function setupChart(varPath){
 
-                console.log(varPath);
+                // entries data
 
                 let svgWidth = 500;
                 let svgHeight = 300;
@@ -125,7 +159,9 @@
                     .attr("height", svgHeight)
                     .attr("class", "bar-chart");
 
-                let dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+                //let dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
+                let pathEntries = varPath.split(",");
+                let dataset = scaleData(svgHeight, getObjVals(pathEntries, entries));
 
                 let barPadding = 5;
                 let barWidth = (svgWidth / dataset.length);
