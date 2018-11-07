@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
+import json
+
 from flask import Flask
 from flask import abort
-from flask import request
 from flask import make_response
+from flask import render_template
+from flask import request
 from flask_basicauth import BasicAuth
-
 
 from model.dms import DMS as DMS_APPLICATION
 
@@ -50,11 +52,10 @@ def delete_app(app_id: str) -> str or int:
 @app.route('/app/<string:app_id>', methods=['GET'])
 @basic_auth.required
 def show_app(app_id: str) -> str:
-
     app_data = DMS.on_app_requested(app_id)
 
     if isinstance(app_data, int):
-        abort(404) # if I use the app_data var it inf. recurses #TODO: Fix this
+        abort(404)  # if I use the app_data var it inf. recurses #TODO: Fix this
     else:
         resp = make_response(app_data)
         resp.headers['Content-Type'] = 'application/json'
@@ -80,6 +81,20 @@ def show_apps():
     resp.headers['Content-Type'] = 'application/json'
     resp.headers['charset'] = 'utf-8'
     return resp
+
+
+@app.route('/overview/')
+def overview():
+    # TODO: We should not be parsing json around internally..redo this (and related tests)
+    apps = [app_json['id'] for app_json in json.loads(DMS.on_apps_requested())]
+    return render_template('index.html', apps_list=apps)
+
+
+@app.route('/overview/<string:app_id>')
+def detail(app_id: str):
+    # TODO: We should not be parsing json around internally..redo this (and related tests)
+    entries = [entry['data'] for entry in json.loads(DMS.on_entries_requested(app_id))]
+    return render_template('detail.html', app_entry_list=entries)
 
 
 if __name__ == '__main__':
