@@ -10,22 +10,6 @@ services:
     depends_on:
       - flask_db
 
- # django_db:
- #   image: postgres
- #   restart: always
- # dms_admin:
- #   build: admin_site
- #   command: python3 admin_site/manage.py runserver 0.0.0.0:8000
- #   #command: django-admin runserver 0.0.0.0:8000
- #   #command: ls admin_site/admin_site
- #   volumes:
- #     - .:/code
- #   ports:
- #     - "8000:8000"
- #   depends_on:
- #     - django_db
- #     - dms_server
-
   flask_db:
     #container_name: "flask_db"
     image: postgres
