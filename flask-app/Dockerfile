@@ -21,6 +21,7 @@ COPY app.py /app
 COPY data /app/data
 COPY model /app/model
 COPY templates /app/templates
+COPY static /app/static
 #CMD python app.py
 
 #ENTRYPOINT [ "python" ]
