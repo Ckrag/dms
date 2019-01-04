@@ -28,7 +28,7 @@ DMS = DMS_APPLICATION()
 
 
 @app.route('/app/<string:app_id>', methods=['POST'])
-#@basic_auth.required
+@basic_auth.required
 def receive_data(app_id: str) -> str or int:
     app_id = app_id.lower()
 
@@ -41,7 +41,7 @@ def receive_data(app_id: str) -> str or int:
 
 
 @app.route('/app/<string:app_id>', methods=['DELETE'])
-#@basic_auth.required
+@basic_auth.required
 def delete_app(app_id: str) -> str or int:
     app_id = app_id.lower()
 
@@ -50,7 +50,7 @@ def delete_app(app_id: str) -> str or int:
 
 
 @app.route('/app/<string:app_id>', methods=['GET'])
-#@basic_auth.required
+@basic_auth.required
 def show_app(app_id: str) -> str:
     app_data = DMS.on_app_requested(app_id)
 
@@ -64,7 +64,7 @@ def show_app(app_id: str) -> str:
 
 
 @app.route('/entries/<string:app_id>', methods=['GET'])
-#@basic_auth.required
+@basic_auth.required
 def show_entries(app_id: str):
     app_id = app_id.lower()
 
@@ -75,7 +75,7 @@ def show_entries(app_id: str):
 
 
 @app.route('/apps', methods=['GET'])
-#@basic_auth.required
+@basic_auth.required
 def show_apps():
     resp = make_response(DMS.on_apps_requested())
     resp.headers['Content-Type'] = 'application/json'

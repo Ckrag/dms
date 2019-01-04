@@ -6,3 +6,7 @@
     display:block;
     /*background-color: aqua;*/
 }
+
+#svg_graph {
+    width: 100%;
+}

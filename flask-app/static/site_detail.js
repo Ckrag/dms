@@ -1,5 +1,5 @@
 function mapRaw(raw, html_anchor){
-    html_anchor.innerHTML += "<button>" + raw + "</button><br>";
+    html_anchor.innerHTML += "<div>" + raw + "</div><br>";
 }
 
 /**
@@ -71,26 +71,43 @@ function refresh() {
     }
 }
 
+
 function setupChart(varPath){
 
     // entries data
 
-    let svgWidth = 500;
+    window.onresize = function (){
+        setupChart(varPath);
+    };
+    let svgWidth = window.innerWidth;
     let svgHeight = 300;
 
+    // Remove existing
+    let svg_cont = document.getElementById("graph_container");
+    // Add new
+    if(svg_cont.firstChild) { svg_cont.removeChild(svg_cont.firstChild); }
+
+    let new_svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //new_svg.className = ""
+    svg_cont.appendChild(new_svg);
+
     let svg = d3.select('svg')
-        .attr("width", svgWidth)
-        .attr("height", svgHeight)
-        .attr("class", "bar-chart");
+    //.attr("width", svgWidth)
+    .attr("width", svgWidth)
+    .attr("height", svgHeight)
+    .attr("class", "bar-chart");
 
     //let dataset = [80, 100, 56, 120, 180, 30, 40, 120, 160];
     let pathEntries = varPath.split(",");
-    let dataset = scaleData(svgHeight, getObjVals(pathEntries, entries));
+    let vals = getObjVals(pathEntries, entries);
+    let dataset = scaleData(svgHeight, vals);
 
     let barPadding = 5;
     let barWidth = (svgWidth / dataset.length);
 
-    let barChart = svg.selectAll("rect")
+    document.getElementById("meta_data").innerText = "Max val: " + Math.max(...vals) + ", Min val: " + Math.min(...vals);
+
+    svg.selectAll("rect")
         .data(dataset)
         .enter()
         .append("rect")
