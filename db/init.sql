@@ -57,7 +57,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_app_entries_with_number_limit(_app_id VARCHAR(20), entries_limit INTEGER)
 RETURNS SETOF app_data as $$
 	BEGIN
-		RETURN QUERY SELECT * FROM app_data WHERE app_id=_app_id LIMIT entries_limit;
+		RETURN QUERY SELECT * FROM (SELECT * FROM app_data WHERE app_id=_app_id ORDER BY created DESC LIMIT entries_limit) AS entries ORDER BY created ASC;
 	END;
 $$ LANGUAGE plpgsql;
 
@@ -75,4 +75,4 @@ RETURNS SETOF app_data as $$
         END;
 $$ LANGUAGE plpgsql;
 
-\df  
+\df
