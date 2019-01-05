@@ -68,7 +68,7 @@ def show_app(app_id: str) -> str:
 def show_entries(app_id: str):
     app_id = app_id.lower()
 
-    resp = make_response(DMS.on_entries_requested(app_id))
+    resp = make_response(get_entries(app_id, request))
     resp.headers['Content-Type'] = 'application/json'
     resp.headers['charset'] = 'utf-8'
     return resp
@@ -95,8 +95,25 @@ def overview():
 @basic_auth.required
 def detail(app_id: str):
     # TODO: We should not be parsing json around internally..redo this (and related tests)
-    entries = [entry['data'] for entry in json.loads(DMS.on_entries_requested(app_id))]
+
+    entries = [entry['data'] for entry in json.loads(get_entries(app_id, request))]
+
     return render_template('detail.html', app_entry_list=entries)
+
+
+def get_entries(app_id: str, req):
+    limit_num = req.args.get('limit_num')
+    limit_min = req.args.get('limit_min')
+    limit_none = req.args.get('limit_none')
+
+    if limit_num:
+        return DMS.on_entries_requested_limit_number(app_id, limit_num)
+    elif limit_min:
+        return DMS.on_entries_requested_limit_min(app_id, limit_min)
+    elif limit_none:
+        return DMS.on_all_entries_requested(app_id)
+    else:
+        return DMS.on_entries_requested_limit_number(app_id, 10)
 
 
 if __name__ == '__main__':

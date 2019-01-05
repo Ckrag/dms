@@ -71,9 +71,18 @@ class DataStore:
         else:
             return App.from_tuple(data)
 
-    def get_app_entries(self, app_id: str) -> []:
-        #self.cursor.execute("SELECT get_app_entries('{}');".format(app_id))
-        self.cursor.execute("SELECT * FROM get_app_entries(%s);", (app_id,))
+    def get_app_entries_limit_number(self, app_id: str, limit: int) -> []:
+        self.cursor.execute("SELECT * FROM get_app_entries_with_number_limit(%s, %s);", (app_id, limit))
+        db_entries = self.cursor.fetchall()
+        return list(map(lambda x: Entry.from_tuple(x), db_entries))
+
+    def get_app_entries_limit_time(self, app_id: str, limit_min: int) -> []:
+        self.cursor.execute("SELECT * FROM get_app_entries_with_time_limit(%s, %s);", (app_id, limit_min))
+        db_entries = self.cursor.fetchall()
+        return list(map(lambda x: Entry.from_tuple(x), db_entries))
+
+    def get_all_app_entries(self, app_id: str) -> []:
+        self.cursor.execute("SELECT * FROM get_all_app_entries(%s);", (app_id,))
         db_entries = self.cursor.fetchall()
         return list(map(lambda x: Entry.from_tuple(x), db_entries))
 

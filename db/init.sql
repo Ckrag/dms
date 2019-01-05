@@ -14,6 +14,8 @@ CREATE TABLE app_data (
 	txt TEXT
 );
 
+CREATE INDEX entry_creation_time_idx ON app_data (created, app_id);
+
 CREATE OR REPLACE FUNCTION add_app_entry(_app_id VARCHAR(20), data TEXT)
 	RETURNS void AS $$
 	BEGIN
@@ -52,11 +54,25 @@ RETURNS SETOF apps as $$
 	END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION get_app_entries(_app_id VARCHAR(20))
+CREATE OR REPLACE FUNCTION get_app_entries_with_number_limit(_app_id VARCHAR(20), entries_limit INTEGER)
 RETURNS SETOF app_data as $$
 	BEGIN
-		RETURN QUERY SELECT * FROM app_data WHERE app_id=_app_id;
+		RETURN QUERY SELECT * FROM app_data WHERE app_id=_app_id LIMIT entries_limit;
 	END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_app_entries_with_time_limit(_app_id VARCHAR(20), minute_limit INTEGER)
+RETURNS SETOF app_data as $$
+        BEGIN
+                RETURN QUERY SELECT * FROM app_data WHERE app_id=_app_id AND created > now() - INTERVAL '1 min' * minute_limit;
+        END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION get_all_app_entries(_app_id VARCHAR(20))
+RETURNS SETOF app_data as $$
+        BEGIN
+                RETURN QUERY SELECT * FROM app_data WHERE app_id=_app_id;
+        END;
 $$ LANGUAGE plpgsql;
 
 \df  

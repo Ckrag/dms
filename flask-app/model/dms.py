@@ -47,10 +47,20 @@ class DMS:
             else:
                 return 404
 
-    def on_entries_requested(self, app_id: str) -> str:
+    def on_all_entries_requested(self, app_id: str) -> str:
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         with db:
-            return json.dumps(list(map(lambda x: x.json(), db.get_app_entries(app_id))))
+            return json.dumps(list(map(lambda x: x.json(), db.get_all_app_entries(app_id))))
+
+    def on_entries_requested_limit_number(self, app_id: str, limit: int) -> str:
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        with db:
+            return json.dumps(list(map(lambda x: x.json(), db.get_app_entries_limit_number(app_id, limit))))
+
+    def on_entries_requested_limit_min(self, app_id: str, limit_min: int) -> str:
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        with db:
+            return json.dumps(list(map(lambda x: x.json(), db.get_app_entries_limit_time(app_id, limit_min))))
 
     def on_app_delete(self, app_id: str) -> int:
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
