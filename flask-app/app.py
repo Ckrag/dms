@@ -84,6 +84,7 @@ def show_apps():
 
 
 @app.route('/overview/', methods=['GET'])
+@basic_auth.required
 def overview():
     # TODO: We should not be parsing json around internally..redo this (and related tests)
     apps = [app_json['id'] for app_json in json.loads(DMS.on_apps_requested())]
@@ -91,6 +92,7 @@ def overview():
 
 
 @app.route('/overview/<string:app_id>', methods=['GET'])
+@basic_auth.required
 def detail(app_id: str):
     # TODO: We should not be parsing json around internally..redo this (and related tests)
     entries = [entry['data'] for entry in json.loads(DMS.on_entries_requested(app_id))]
