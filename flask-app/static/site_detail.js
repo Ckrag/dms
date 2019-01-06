@@ -11,7 +11,11 @@ function mapJson(obj, html_anchor, path = []){
         if (obj.hasOwnProperty(key)) {
             if(isPrimitive(obj[key])){
 
+                //TODO: We should only show one representative entry, "sensitive" attributes if they are not pressent
+                // on all objects
                 if(isNaN(obj[key])){
+                    //TODO: fail gracefully?
+                    let sensitive = false;
                     if(sensitive){
                         // Cancel graph
                     } else {
@@ -60,7 +64,7 @@ function refresh() {
                 try{
                     mapJson(JSON.parse(entries[entry]), container);
                 } catch (e) {
-                    console.log("Unable to parse json:" + entries[entry])
+                    console.log("Unable to parse json:" + entries[entry] + ", reason: " + e);
                 }
             }
             break;
