@@ -1,25 +1,33 @@
 version: "3"
 services:
-  dms_server:
-    build: flask-app
-    command: python app.py
-    links:
-      - flask_db
-    ports:
-      - "5000:5000"
-    depends_on:
-      - flask_db
+  #dms_server:
+  #  build: flask-app
+  #  command: python app.py
+  #  links:
+  #    - flask_db
+  #  ports:
+  #    - "5000:5000"
+  #  depends_on:
+  #    - flask_db
 
   flask_db:
     #container_name: "flask_db"
-    image: postgres
+    image: postgres:12.0
     restart: always
     ports:
     - "5431:5432"
     environment:
-      POSTGRES_USER: 'root'
-      POSTGRES_PASSWORD: 'root'
-      POSTGRES_DB: 'dms_db'
-    volumes:
-    - ./data:/var/lib/postgresql/data/
-    - ./db:/docker-entrypoint-initdb.d/:ro
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: dms
+    #volumes:
+    #- ./data:/var/lib/postgresql/data/
+    #- ./db:/docker-entrypoint-initdb.d/:ro
+  liqui:
+    depends_on:
+      - flask_db
+    build:
+      context: .
+      dockerfile: ./liquibase/Dockerfile
+    links:
+      - flask_db

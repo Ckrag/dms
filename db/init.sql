@@ -1,6 +1,3 @@
-CREATE DATABASE dms;
-\connect dms;
-
 CREATE TABLE apps (
   	id VARCHAR(20),
   	description VARCHAR(300),
@@ -75,4 +72,3 @@ RETURNS SETOF app_data as $$
         END;
 $$ LANGUAGE plpgsql;
 
-\df
