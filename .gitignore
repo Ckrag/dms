@@ -4,6 +4,10 @@
 flask-app/.idea
 flask-app/*/__pycache__
 flask-app/__pycache__/
+grafana-app/.idea
+grafana-app/*/__pycache__
+grafana-app/__pycache__/
+data
 .pyc
 .pytest_cache
 __pycache__

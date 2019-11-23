@@ -9,7 +9,15 @@ services:
       - "5000:5000"
     depends_on:
       - flask_db
-
+  grafana_server:
+    build: grafana-app
+    command: python app.py
+    links:
+      - flask_db
+    ports:
+      - "6000:5000"
+    depends_on:
+      - flask_db
   flask_db:
     #container_name: "flask_db"
     image: postgres:12.0
