@@ -1,4 +1,7 @@
-import psycopg2
+import time
+from datetime import datetime
+
+from db_connection import DBConnection
 
 
 class DataStore:
@@ -7,32 +10,21 @@ class DataStore:
     https://www.python.org/dev/peps/pep-3107/
     """
 
-    def __init__(self, conn):
-        self.conn = conn
-        self.cursor = conn.cursor()
+    def __init__(self, conn: DBConnection):
+        self.connection = conn
 
-    def __enter__(self):
-        return self
+    def get_app_names(self) -> list:
+        with self.connection as conn:
+            res_proxy = conn.execute("SELECT id FROM apps")
+            return [list(row)[0] for row in res_proxy]
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.conn.commit()
-        return self.close()
+    def get_app_data(self, app_id: str, interval_start_unix: int = 0, interval_end_unix: int = time.time()):
+        start = self._sql_time_from_unix(interval_start_unix)
+        end = self._sql_time_from_unix(interval_end_unix)
+        with self.connection as conn:
+            res_proxy = conn.execute("SELECT * FROM app_data WHERE app_id=:id and created >= :start and created <= :end",
+                             id=app_id, start=start, end=end)
+            return [list(row) for row in res_proxy]
 
-    @staticmethod
-    def get_db_connection(config: str) -> psycopg2.connect:
-        """
-
-        :return: DB cursor
-        """
-        return psycopg2.connect(config)
-
-    def close(self):
-        try:
-            self.cursor.close()
-            self.conn.close()
-            return True
-        except Exception as e:
-            return False
-
-    def get_apps(self) -> list:
-        self.cursor.execute("SELECT id FROM apps")
+    def _sql_time_from_unix(self, unix: int) -> str:
+        return datetime.utcfromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S')

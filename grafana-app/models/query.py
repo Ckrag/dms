@@ -1,3 +1,4 @@
+from repository.data_store import DataStore
 from util import Util
 
 
@@ -49,19 +50,33 @@ class Target:
         return self._type
 
 
-class TimeSerie:
+class ResponseEntry:
 
-    def __init__(self, name: str, interval_from: int, interval_to: int):
-        pass
+    def __init__(self, data_store: DataStore, name: str, interval_from: int, interval_to: int, ms_interval: int,
+                 max_data_point: int):
+        self.name = name
+        self.interval_from = interval_from
+        self.interval_to = interval_to
+        self.ms_interval = ms_interval
+        self.max_data_point = max_data_point
+        self.data_store = data_store
 
-    def as_response(self) -> dict:
-        return {}
+    def as_time_series(self) -> dict:
+        app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
 
+        data_points = [data[2:3] for data in app_data]
 
-class Table:
+        # Filter data points
+        # Ensure none bigger than large
 
-    def __init__(self, name: str, interval_from: int, interval_to: int):
-        pass
+        return {
+            'target': self.name,
+            'data_points': data_points
+        }
 
-    def as_response(self) -> dict:
-        return {}
+    def as_table(self):
+        return {
+            'type': 'table',
+            'columns': ['id', 'created', 'data'],
+            'rows': self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
+        }
