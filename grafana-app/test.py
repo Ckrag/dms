@@ -37,17 +37,23 @@ class Test(unittest.TestCase):
                 "insert into app_data (app_id, created, txt) values ('interval app', '1994-02-27 00:00:00', '4')")
         self.data_store.get_app_data('interval app', )
 
-    def setUp(self) -> None:
-        self.conn = DBConnection(conn_str)
-        self.data_store = data_store.DataStore(self.conn)
+    def tearDown(self) -> None:
         with self.conn as conn:
             conn.execute("DELETE FROM app_data")
             conn.execute("DELETE FROM apps")
 
+    def setUp(self) -> None:
+        with self.conn as conn:
             conn.execute("insert into apps (id, description) values ('the app', 'desc of test app')")
             conn.execute("insert into apps (id, description) values ('the other app', 'desc of the other app')")
             conn.execute("insert into app_data (app_id, created, txt) values ('the app', '1970-01-01 00:00:02', 'fu')")
-            conn.execute("insert into app_data (app_id, created, txt) values ('the other app', '1970-01-01 00:00:01','bar')")
+            conn.execute(
+                "insert into app_data (app_id, created, txt) values ('the other app', '1970-01-01 00:00:01','bar')")
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.conn = DBConnection(conn_str)
+        cls.data_store = data_store.DataStore(cls.conn)
 
 
 if __name__ == '__main__':
