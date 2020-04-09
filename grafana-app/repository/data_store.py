@@ -3,6 +3,8 @@ from datetime import datetime
 
 from db_connection import DBConnection
 
+from sqlalchemy.sql import text
+
 
 class DataStore:
     """
@@ -22,9 +24,11 @@ class DataStore:
         start = self._sql_time_from_unix(interval_start_unix)
         end = self._sql_time_from_unix(interval_end_unix)
         with self.connection as conn:
-            res_proxy = conn.execute("SELECT * FROM app_data WHERE app_id=:id and created >= :start and created <= :end",
-                             id=app_id, start=start, end=end)
-            return [list(row) for row in res_proxy]
+            res_proxy = conn.execute(
+                text("SELECT * FROM app_data WHERE app_id=:id and created >= :start and created <= :end"),
+                id=app_id, start=start, end=end).fetchall()
+            return res_proxy
+            #return [list(row) for row in res_proxy]
 
     def _sql_time_from_unix(self, unix: int) -> str:
         return datetime.utcfromtimestamp(unix).strftime('%Y-%m-%d %H:%M:%S')
