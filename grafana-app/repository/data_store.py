@@ -18,7 +18,8 @@ class DataStore:
     def get_app_names(self) -> list:
         with self.connection as conn:
             res_proxy = conn.execute("SELECT id FROM apps")
-            return [list(row)[0] for row in res_proxy]
+            return res_proxy
+            #return [list(row)[0] for row in res_proxy]
 
     def get_app_data(self, app_id: str, interval_start_unix: int = 0, interval_end_unix: int = time.time()):
         start = self._sql_time_from_unix(interval_start_unix)

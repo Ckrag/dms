@@ -1,4 +1,5 @@
 from repository.data_store import DataStore
+from datetime import datetime, timedelta
 from util import Util
 
 
@@ -36,8 +37,6 @@ class Query:
 
 
 class Target:
-    _name = None
-    _type = None
 
     def __init__(self, query_data: dict):
         self._name = query_data['target']
@@ -58,13 +57,13 @@ class ResponseEntry:
         self.interval_from = interval_from
         self.interval_to = interval_to
         self.ms_interval = ms_interval
-        self.max_data_point = max_data_point
+        self.max_data_points = max_data_point
         self.data_store = data_store
 
     def as_time_series(self) -> dict:
         app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
 
-        data_points = [data[2:3] for data in app_data]
+        data_points = [data[2] for data in self._get_filtered(app_data)]
 
         # Filter data points
         # Ensure none bigger than large
@@ -74,9 +73,41 @@ class ResponseEntry:
             'data_points': data_points
         }
 
-    def as_table(self):
+    def as_table(self) -> dict:
+        data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
         return {
             'type': 'table',
             'columns': ['id', 'created', 'data'],
-            'rows': self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
+            'rows': [list(t) for t in self._get_filtered(data)]
         }
+
+    def _get_filtered(self, data_points: list, margin=1.2) -> list:
+        date_from = datetime.fromtimestamp(self.interval_from)
+        date_to = datetime.fromtimestamp(self.interval_to)
+
+        if len(data_points) <= self.max_data_points:
+            return data_points # Should still do dine, we'll see
+
+        # Filter outside interval
+        interval_data = [x for x in data_points if date_from <= x[1] <= date_to]
+
+        # Filter clustered data
+        spaced_data = []
+        i = 0
+        while i < len(interval_data) - 1:
+            interval = (interval_data[i + 1][1] - interval_data[i][1]).total_seconds() * 1000
+            if interval <= self.ms_interval * margin:
+                spaced_data.append(interval_data[i])
+            i += 1
+
+        # Evenly remove to get requested number
+        overflow = abs(len(spaced_data) - self.max_data_points)
+        if overflow <= 0:
+            return spaced_data
+        nth_required_delete = 1 / (overflow / len(spaced_data))
+        fitted_data = []
+        for i, data in enumerate(spaced_data):
+            if divmod(i+1, nth_required_delete)[1] != 0:
+                fitted_data.append(data)
+
+        return fitted_data

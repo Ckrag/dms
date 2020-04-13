@@ -6,7 +6,7 @@ import flask
 
 from models.annotation import Annotation
 from models.query import Query
-from response import Response
+from responder import Responder
 
 # http://www.oznetnerd.com/writing-a-grafana-backend-using-the-simple-json-datasource-flask/
 # https://github.com/grafana/simple-json-datasource
@@ -23,7 +23,8 @@ def search():
     # Liste of named services
     targets = []
 
-    return json.dumps(Response.search()), 200
+    responder = Responder(Responder.get_data_store())
+    return json.dumps(responder.search()), 200
 
 
 @app.route('/query', methods=['GET'])
@@ -31,7 +32,8 @@ def query():
     grafana_query = json.loads(request.data.decode("utf-8"))
     g_query = Query(grafana_query)
 
-    resp = Response.query(g_query)
+    responder = Responder(Responder.get_data_store())
+    resp = responder.query(g_query)
     return (json.dumps(resp), 200) if resp else flask.abort(500)
 
 
@@ -39,7 +41,8 @@ def query():
 def annotations():
     grafana_annotation = json.loads(request.data.decode("utf-8"))
     annotation = Annotation(grafana_annotation)
-    return json.dumps(Response.annotation(annotation)), 200
+    responder = Responder(Responder.get_data_store())
+    return json.dumps(responder.annotation(annotation)), 200
 
 
 if __name__ == '__main__':

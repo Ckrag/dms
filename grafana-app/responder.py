@@ -5,20 +5,21 @@ from models.query import ResponseEntry
 from repository.data_store import DataStore
 
 
-class Response:
+class Responder:
 
     @staticmethod
-    def _get_data_store() -> DataStore:
+    def get_data_store() -> DataStore:
+        #TODO: Make env variable
         #return DataStore(DBConnection("dbname='dms' user='root' password='root' host='flask_db' port='5432'"))
         return DataStore(DBConnection("postgresql://flask_db:5432/dms?user=root&password=root"))
 
-    @staticmethod
-    def query(query: Query) -> list:
+    def __init__(self, data_store: DataStore):
+        self._data_store = data_store
+
+    def query(self, query: Query) -> list:
 
         _TIME_SERIE = "timeserie"
         _TABLE = "table"
-
-        data_store = Response._get_data_store()
 
         resp = []
 
@@ -26,7 +27,7 @@ class Response:
             if target.get_type() == _TIME_SERIE:
                 resp.append(
                     ResponseEntry(
-                        data_store,
+                        self._data_store,
                         target.get_name(),
                         *query.get_unix_range(),
                         query.get_ms_interval(),
@@ -36,7 +37,7 @@ class Response:
             elif target.get_type() == _TABLE:
                 resp.append(
                     ResponseEntry(
-                        data_store,
+                        self._data_store,
                         target.get_name(),
                         *query.get_unix_range(),
                         query.get_ms_interval(),
@@ -54,13 +55,11 @@ class Response:
 
         return resp
 
-    @staticmethod
-    def annotation(annotation: Annotation) -> list:
+    def annotation(self, annotation: Annotation) -> list:
         # TOTO: Implement this. Empty response for now
         rsp_annotations = []
         return rsp_annotations
 
-    @staticmethod
-    def search() -> list:
+    def search(self) -> list:
         # Get all names
-        return Response._get_data_store().get_app_names()
+        return self._data_store.get_app_names()
