@@ -3,6 +3,7 @@ import datetime
 import sys
 import unittest
 from unittest.mock import Mock
+import time
 
 from db_connection import DBConnection
 from models.query import Query
@@ -24,12 +25,9 @@ class DatastoreTest(unittest.TestCase):
     def test_get_app_data(self) -> None:
         entries = self.data_store.get_app_data('the app')
         self.assertEqual(1, len(entries))
-        self.assertEqual([('the app', datetime.datetime(1970, 1, 1, 0, 0, 2), 'fu')], entries)
+        self.assertEqual([['the app', datetime.datetime(1970, 1, 1, 0, 0, 2), 'fu']], entries)
 
     def test_get_app_data_for_interval(self) -> None:
-        self.fail("Not implemented")
-
-    def test_get_app_data_interval(self) -> None:
         with self.conn as conn:
             conn.execute("insert into apps (id, description) values ('interval app', 'desc of test app')")
             conn.execute(
@@ -42,6 +40,20 @@ class DatastoreTest(unittest.TestCase):
                 "insert into app_data (app_id, created, txt) values ('interval app', '1993-02-27 00:00:00', '3')")
             conn.execute(
                 "insert into app_data (app_id, created, txt) values ('interval app', '1994-02-27 00:00:00', '4')")
+
+        start = datetime.datetime(1991, 1, 1, 0, 0, 0)
+        end = datetime.datetime(1993, 3, 1, 0, 0, 0)
+
+        expected = [
+            ['interval app', datetime.datetime(1991, 2, 27), '2'],
+            ['interval app', datetime.datetime(1992, 2, 27), '2'],
+            ['interval app', datetime.datetime(1993, 2, 27), '3']
+        ]
+        entries = self.data_store.get_app_data('interval app', start.timestamp(), end.timestamp())
+        self.assertEqual(expected, entries)
+
+    def test_get_app_data_interval(self) -> None:
+
         self.data_store.get_app_data('interval app', )
 
     def tearDown(self) -> None:

@@ -33,9 +33,9 @@ while ! pg_isready -h 0.0.0.0 -p 9999 > /dev/null 2> /dev/null; do
   done
 
 # build DB
-PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -f $DIR_PATH/db/init.sql
+PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -c 'CREATE DATABASE dms;'
+PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -d 'dms' -f $DIR_PATH/db/init.sql
 
 echo "Running tests"
 python3 ./grafana-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
 echo "Tests complete"
-#for f in grafana-app/test/*.py; do python3 "$f"; done

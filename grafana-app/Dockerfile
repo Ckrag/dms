@@ -16,12 +16,13 @@ COPY requirements.txt /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY app.py /app
-COPY response.py /app
-COPY util.py /app
-COPY db_connection.py /app
+COPY . /app
+#COPY app.py /app
+#COPY response.py /app
+#COPY util.py /app
+#COPY db_connection.py /app
 
 
 #COPY data /app/data
-COPY models /app/models
-COPY repository /app/repository
+#COPY models /app/models
+#COPY repository /app/repository

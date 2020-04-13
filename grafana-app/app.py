@@ -21,8 +21,6 @@ def health():
 @app.route('/search', methods=['POST'])
 def search():
     # Liste of named services
-    targets = []
-
     responder = Responder(Responder.get_data_store())
     return json.dumps(responder.search()), 200
 

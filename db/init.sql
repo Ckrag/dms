@@ -1,6 +1,3 @@
-CREATE DATABASE dms;
-\c dms 
-
 CREATE TABLE apps (
   	id VARCHAR(20),
   	description VARCHAR(300),
