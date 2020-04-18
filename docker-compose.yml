@@ -3,8 +3,6 @@ services:
   dms_server:
     build: flask-app
     command: python app.py
-    links:
-      - flask_db
     ports:
       - "5000:5000"
     depends_on:
@@ -12,17 +10,31 @@ services:
   grafana_server:
     build: grafana-app
     command: python app.py
-    links:
-      - flask_db
+    #container_name: grafana_server <- not needed
     ports:
       - "6000:5000"
     depends_on:
       - flask_db
+  grafana_ui:
+    #image: grafana/grafana:6.7.2
+    build:
+      context: .
+      dockerfile: ./grafana-ui/Dockerfile
+      args:
+        GRAFANA_VERSION: 6.7.2
+        GF_INSTALL_PLUGINS: grafana-simple-json-datasource #,grafana-clock-panel
+    restart: always
+    user: "104"
+    depends_on:
+      - grafana_server
+      - flask_db
+    ports:
+      - "3000:3000" 
   flask_db:
     image: postgres:12.0
     restart: always
     ports:
-    - "5431:5432"
+      - "5431:5432"
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root

@@ -3,7 +3,6 @@ import datetime
 import sys
 import unittest
 from unittest.mock import Mock
-import time
 
 from db_connection import DBConnection
 from models.query import Query
@@ -52,9 +51,11 @@ class DatastoreTest(unittest.TestCase):
         entries = self.data_store.get_app_data('interval app', start.timestamp(), end.timestamp())
         self.assertEqual(expected, entries)
 
-    def test_get_app_data_interval(self) -> None:
-
-        self.data_store.get_app_data('interval app', )
+    def test_get_empty_app_data(self) -> None:
+        start = datetime.datetime(1990, 1, 1)
+        end = datetime.datetime(1990, 1, 1)
+        entries = self.data_store.get_app_data('interval app', start.timestamp(), end.timestamp())
+        self.assertEqual([], entries)
 
     def tearDown(self) -> None:
         with self.conn as conn:
@@ -97,9 +98,21 @@ class ResponseTest(unittest.TestCase):
                 'to': "2020-01-04T12:00:00.000Z"
             }
         })
-        expected = [
+        expected_old = [
             {
                 'data_points': ['fu', 'fu', 'fu', 'fu', 'fu'],
+                'target': 'fubar'
+            }
+        ]
+        expected = [
+            {
+                'datapoints': [
+                    ['fu', 1577880000000],
+                    ['fu', 1577880000000],
+                    ['fu', 1577880000000],
+                    ['fu', 1577880000000],
+                    ['fu', 1577880000000]
+                ],
                 'target': 'fubar'
             }
         ]
@@ -121,7 +134,7 @@ class ResponseTest(unittest.TestCase):
                 'to': "2020-01-04T12:00:00.000Z"
             }
         })
-        expected = [
+        expected_old = [
             {
                 'type': 'table',
                 'columns': ['id', 'created', 'data'],
@@ -130,6 +143,32 @@ class ResponseTest(unittest.TestCase):
                          ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
                          ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
                          ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu']],
+            }
+        ]
+        expected = [
+            {
+                'type': 'table',
+                'columns': [
+                    {
+                        'text': 'id',
+                        'type': 'string',
+                    },
+                    {
+                        'text': 'time',
+                        'type': 'time',
+                    },
+                    {
+                        'text': 'data',
+                        'type': 'string',
+                    },
+                ],
+                'rows': [
+                    ['the app', 1577880000000, 'fu'],
+                    ['the app', 1577880000000, 'fu'],
+                    ['the app', 1577880000000, 'fu'],
+                    ['the app', 1577880000000, 'fu'],
+                    ['the app', 1577880000000, 'fu']
+                ],
             }
         ]
         self.assertEqual(expected, self.responder.query(q1))

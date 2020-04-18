@@ -63,22 +63,35 @@ class ResponseEntry:
     def as_time_series(self) -> dict:
         app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
 
-        data_points = [data[2] for data in self._get_filtered(app_data)]
+        data_points = [[data[2], data[1].timestamp()*1000] for data in self._get_filtered(app_data)]
 
         # Filter data points
         # Ensure none bigger than large
 
         return {
             'target': self.name,
-            'data_points': data_points
+            'datapoints': data_points
         }
 
     def as_table(self) -> dict:
         data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
         return {
             'type': 'table',
-            'columns': ['id', 'created', 'data'],
-            'rows': [list(t) for t in self._get_filtered(data)]
+            'columns': [
+                    {
+                        'text': 'id',
+                        'type': 'string',
+                    },
+                    {
+                        'text': 'time',
+                        'type': 'time',
+                    },
+                    {
+                        'text': 'data',
+                        'type': 'string',
+                    },
+                ],
+            'rows': [[t[0], int(t[1].timestamp()*1000), t[2]] for t in self._get_filtered(data)]
         }
 
     def _get_filtered(self, data_points: list, margin=1.2) -> list:

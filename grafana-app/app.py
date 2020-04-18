@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask
+from flask import Flask, Response
 from flask import request
 import flask
 
@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def health():
-    return '{}', 200
+    return Response(status = 200)
 
 
 @app.route('/search', methods=['POST'])
@@ -25,7 +25,8 @@ def search():
     return json.dumps(responder.search()), 200
 
 
-@app.route('/query', methods=['GET'])
+#@app.route('/query', methods=['GET'])
+@app.route('/query', methods=['POST'])
 def query():
     grafana_query = json.loads(request.data.decode("utf-8"))
     g_query = Query(grafana_query)
