@@ -2,6 +2,7 @@
 import datetime
 import sys
 import unittest
+import json
 from unittest.mock import Mock
 
 from db_connection import DBConnection
@@ -98,12 +99,6 @@ class ResponseTest(unittest.TestCase):
                 'to': "2020-01-04T12:00:00.000Z"
             }
         })
-        expected_old = [
-            {
-                'data_points': ['fu', 'fu', 'fu', 'fu', 'fu'],
-                'target': 'fubar'
-            }
-        ]
         expected = [
             {
                 'datapoints': [
@@ -134,27 +129,16 @@ class ResponseTest(unittest.TestCase):
                 'to': "2020-01-04T12:00:00.000Z"
             }
         })
-        expected_old = [
-            {
-                'type': 'table',
-                'columns': ['id', 'created', 'data'],
-                'rows': [['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
-                         ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
-                         ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
-                         ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu'],
-                         ['the app', datetime.datetime(2020, 1, 1, 4, 0), 'fu']],
-            }
-        ]
         expected = [
             {
                 'type': 'table',
                 'columns': [
                     {
-                        'text': 'id',
+                        'text': 'dms_id',
                         'type': 'string',
                     },
                     {
-                        'text': 'time',
+                        'text': 'dms_time',
                         'type': 'time',
                     },
                     {
@@ -173,9 +157,6 @@ class ResponseTest(unittest.TestCase):
         ]
         self.assertEqual(expected, self.responder.query(q1))
 
-    def tearDown(self) -> None:
-        pass
-
     def setUp(self) -> None:
         self.ds = Mock()
         self.ds.get_app_data.return_value = [
@@ -187,6 +168,84 @@ class ResponseTest(unittest.TestCase):
         ]
         self.responder = Responder(self.ds)
 
+
+class ResponseJsonTest(unittest.TestCase):
+
+    def test_query_for_table_gets_all_json_data(self) -> None:
+        hour_in_ms = 3600000
+        q1 = Query({
+            'intervalMs': hour_in_ms,
+            'targets': [
+                {
+                    'target': 'fubar',
+                    'type': 'table'
+                }
+            ],
+            'maxDataPoints': 5,
+            'range': {
+                'from': "2020-01-01T12:00:00.000Z",
+                'to': "2020-01-04T12:00:00.000Z"
+            }
+        })
+        expected = [
+            {
+                'type': 'table',
+                'columns': [
+                    {
+                        'text': 'dms_id',
+                        'type': 'string',
+                    },
+                    {
+                        'text': 'dms_time',
+                        'type': 'time',
+                    },
+                    {
+                        'text': 'inner.fu',
+                        'type': 'string',
+                    },
+                    {
+                        'text': 'inner.bar',
+                        'type': 'number',
+                    },
+                    {
+                        'text': 'outer',
+                        'type': 'number',
+                    }
+                ],
+                'rows': [
+                    ['the app', 1577880000000, 'bar', 2, 123.4],
+                    ['the app', 1577880000000, 'bar', 2, 123.4],
+                    ['the app', 1577880000000, 'bar', 2, 123.4],
+                    ['the app', 1577880000000, 'bar', 2, 123.4],
+                    ['the app', 1577880000000, 'bar', 2, 123.4]
+                ],
+            }
+        ]
+        #print(expected)
+        #print("==============================")
+        #print(self.responder.query(q1))
+        self.maxDiff = None
+        self.assertEqual(expected, self.responder.query(q1))
+
+    def setUp(self) -> None:
+
+        j_data = json.dumps({
+            'inner': {
+                'fu': 'bar',
+                'bar': 2
+            },
+            'outer': 123.4
+        })
+
+        self.ds = Mock()
+        self.ds.get_app_data.return_value = [
+            ('the app', datetime.datetime(2020, 1, 1, 4), j_data),
+            ('the app', datetime.datetime(2020, 1, 1, 4), j_data),
+            ('the app', datetime.datetime(2020, 1, 1, 4), j_data),
+            ('the app', datetime.datetime(2020, 1, 1, 4), j_data),
+            ('the app', datetime.datetime(2020, 1, 1, 4), j_data)
+        ]
+        self.responder = Responder(self.ds)
 
 class QueryTest(unittest.TestCase):
 
@@ -221,6 +280,23 @@ class QueryTest(unittest.TestCase):
         filtered = q._get_filtered(data, 1)
 
         self.assertEqual(expected, filtered)
+
+    def test_parse_entry(self):
+
+        data = {
+            'attr': {
+                'inner': 'fu',
+                'v': 1
+            },
+            'bar': 'fubar'
+        }
+        exp = {
+            'attr.inner': 'fu',
+            'attr.v': 1,
+            'bar': 'fubar'
+        }
+        q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)
+        self.assertEqual(exp, q._key_vals_to_path_vals(data, '.'))
 
 
 if __name__ == '__main__':

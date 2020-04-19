@@ -1,5 +1,7 @@
+import json
+from datetime import datetime
+import numbers
 from repository.data_store import DataStore
-from datetime import datetime, timedelta
 from util import Util
 
 
@@ -63,7 +65,7 @@ class ResponseEntry:
     def as_time_series(self) -> dict:
         app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
 
-        data_points = [[data[2], data[1].timestamp()*1000] for data in self._get_filtered(app_data)]
+        data_points = [[data[2], data[1].timestamp() * 1000] for data in self._get_filtered(app_data)]
 
         # Filter data points
         # Ensure none bigger than large
@@ -75,15 +77,58 @@ class ResponseEntry:
 
     def as_table(self) -> dict:
         data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
-        return {
-            'type': 'table',
-            'columns': [
+        filtered_data = self._get_filtered(data)
+        # Strong assumption here that all entries have identical attributes.
+        # If anything fails, default to standard response
+        # TODO: Enforce structure on data from DMS-ingest instead of implementing error handling here
+        # TODO: Expose fields for with each endpoint, removing need for this fuckery
+
+        try:
+            resp = {
+                'type': 'table',
+                'columns': [
                     {
-                        'text': 'id',
+                        'text': 'dms_id',
                         'type': 'string',
                     },
                     {
-                        'text': 'time',
+                        'text': 'dms_time',
+                        'type': 'time',
+                    }
+                ],
+                'rows': []
+            }
+            columns_complete = False
+            for entry in filtered_data:
+                data_dict = json.loads(entry[2])
+                paths = self._key_vals_to_path_vals(data_dict)
+                table_row_entries = []
+                for p, v in paths.items():
+                    table_row_entries.append(v)
+                    if columns_complete:
+                        continue
+                    # Removable when above TODOs done..
+                    c = {
+                        'text': p,
+                        # TODO: Handle time type..
+                        'type': 'number' if isinstance(v, numbers.Number) else 'string'
+                    }
+                    if c not in resp['columns']:
+                        resp['columns'].append(c)
+                columns_complete = True
+                resp['rows'].append([entry[0], int(entry[1].timestamp() * 1000), *table_row_entries])
+
+            return resp
+        except ValueError:
+            return {
+                'type': 'table',
+                'columns': [
+                    {
+                        'text': 'dms_id',
+                        'type': 'string',
+                    },
+                    {
+                        'text': 'dms_time',
                         'type': 'time',
                     },
                     {
@@ -91,15 +136,15 @@ class ResponseEntry:
                         'type': 'string',
                     },
                 ],
-            'rows': [[t[0], int(t[1].timestamp()*1000), t[2]] for t in self._get_filtered(data)]
-        }
+                'rows': [[t[0], int(t[1].timestamp() * 1000), t[2]] for t in filtered_data]
+            }
 
     def _get_filtered(self, data_points: list, margin=1.2) -> list:
         date_from = datetime.fromtimestamp(self.interval_from)
         date_to = datetime.fromtimestamp(self.interval_to)
 
         if len(data_points) <= self.max_data_points:
-            return data_points # Should still do dine, we'll see
+            return data_points  # Should still do fine, we'll see
 
         # Filter outside interval
         interval_data = [x for x in data_points if date_from <= x[1] <= date_to]
@@ -120,7 +165,19 @@ class ResponseEntry:
         nth_required_delete = 1 / (overflow / len(spaced_data))
         fitted_data = []
         for i, data in enumerate(spaced_data):
-            if divmod(i+1, nth_required_delete)[1] != 0:
+            if divmod(i + 1, nth_required_delete)[1] != 0:
                 fitted_data.append(data)
 
         return fitted_data
+
+    def _key_vals_to_path_vals(self, entry: dict, delimiter='.', base='', paths=None) -> dict:
+        if paths is None:
+            paths = {}
+        for k, v in entry.items():
+            if isinstance(v, dict):
+                n_base = str(k) if len(base) == 0 else base + delimiter + str(k)
+                self._key_vals_to_path_vals(v, delimiter, n_base, paths)
+            else:
+                n_base = '' if len(base) == 0 else base + delimiter
+                paths[n_base + str(k)] = v
+        return paths
