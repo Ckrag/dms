@@ -298,6 +298,14 @@ class QueryTest(unittest.TestCase):
         q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)
         self.assertEqual(exp, q._key_vals_to_path_vals(data, '.'))
 
+    def test_is_json(self):
+        q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)
+        self.assertFalse(q._is_json('2'))
+        self.assertFalse(q._is_json('lol'))
+        self.assertFalse(q._is_json('{'))
+        self.assertFalse(q._is_json('}'))
+        self.assertTrue(q._is_json('{}'))
+
 
 if __name__ == '__main__':
     conn_str = sys.argv.pop()  # Hacky, but prefer being able to dynamically parse the conn string for DB tests

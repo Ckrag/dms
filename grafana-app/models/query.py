@@ -1,6 +1,7 @@
 import json
-from datetime import datetime
 import numbers
+from datetime import datetime
+
 from repository.data_store import DataStore
 from util import Util
 
@@ -83,61 +84,80 @@ class ResponseEntry:
         # TODO: Enforce structure on data from DMS-ingest instead of implementing error handling here
         # TODO: Expose fields for with each endpoint, removing need for this fuckery
 
-        try:
-            resp = {
-                'type': 'table',
-                'columns': [
-                    {
-                        'text': 'dms_id',
-                        'type': 'string',
-                    },
-                    {
-                        'text': 'dms_time',
-                        'type': 'time',
-                    }
-                ],
-                'rows': []
-            }
-            columns_complete = False
-            for entry in filtered_data:
-                data_dict = json.loads(entry[2])
-                paths = self._key_vals_to_path_vals(data_dict)
-                table_row_entries = []
-                for p, v in paths.items():
-                    table_row_entries.append(v)
-                    if columns_complete:
-                        continue
-                    # Removable when above TODOs done..
-                    c = {
-                        'text': p,
-                        # TODO: Handle time type..
-                        'type': 'number' if isinstance(v, numbers.Number) else 'string'
-                    }
-                    if c not in resp['columns']:
-                        resp['columns'].append(c)
-                columns_complete = True
-                resp['rows'].append([entry[0], int(entry[1].timestamp() * 1000), *table_row_entries])
+        if filtered_data and self._is_json(filtered_data[0][2]):
+            return self._make_table_json(filtered_data)
+        else:
+            return self._make_table_simple(filtered_data)
 
-            return resp
+    def _make_table_simple(self, data: list) -> dict:
+        return {
+            'type': 'table',
+            'columns': [
+                {
+                    'text': 'dms_id',
+                    'type': 'string',
+                },
+                {
+                    'text': 'dms_time',
+                    'type': 'time',
+                },
+                {
+                    'text': 'data',
+                    'type': 'string',
+                },
+            ],
+            'rows': [[t[0], int(t[1].timestamp() * 1000), t[2]] for t in data]
+        }
+
+    def _make_table_json(self, data: list) -> dict:
+        # Strong assumption here that all entries have identical attributes.
+        # If anything fails, default to standard response
+        # TODO: Enforce structure on data from DMS-ingest instead of implementing error handling here
+        # TODO: Expose fields for with each endpoint, removing need for this fuckery
+        resp = {
+            'type': 'table',
+            'columns': [
+                {
+                    'text': 'dms_id',
+                    'type': 'string',
+                },
+                {
+                    'text': 'dms_time',
+                    'type': 'time',
+                }
+            ],
+            'rows': []
+        }
+        columns_complete = False
+        for entry in data:
+            data_dict = json.loads(entry[2])
+            paths = self._key_vals_to_path_vals(data_dict)
+            table_row_entries = []
+            for p, v in paths.items():
+                table_row_entries.append(v)
+                if columns_complete:
+                    continue
+                # Removable when above TODOs done..
+                c = {
+                    'text': p,
+                    # TODO: Handle time type..
+                    'type': 'number' if isinstance(v, numbers.Number) else 'string'
+                }
+                if c not in resp['columns']:
+                    resp['columns'].append(c)
+            columns_complete = True
+            resp['rows'].append([entry[0], int(entry[1].timestamp() * 1000), *table_row_entries])
+
+        return resp
+
+    def _is_json(self, data: str) -> bool:
+        if not '{' in data:
+            return False
+        try:
+            json.loads(data)
         except ValueError:
-            return {
-                'type': 'table',
-                'columns': [
-                    {
-                        'text': 'dms_id',
-                        'type': 'string',
-                    },
-                    {
-                        'text': 'dms_time',
-                        'type': 'time',
-                    },
-                    {
-                        'text': 'data',
-                        'type': 'string',
-                    },
-                ],
-                'rows': [[t[0], int(t[1].timestamp() * 1000), t[2]] for t in filtered_data]
-            }
+            return False
+        return True
 
     def _get_filtered(self, data_points: list, margin=1.2) -> list:
         date_from = datetime.fromtimestamp(self.interval_from)
