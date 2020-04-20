@@ -22,7 +22,7 @@ services:
       dockerfile: ./grafana-ui/Dockerfile
       args:
         GRAFANA_VERSION: 6.7.2
-        GF_INSTALL_PLUGINS: grafana-simple-json-datasource #,grafana-clock-panel
+        GF_INSTALL_PLUGINS: grafana-simple-json-datasource, flant-statusmap-panel, michaeldmoore-multistat-panel #,grafana-clock-panel
     restart: always
     user: "104"
     depends_on:
