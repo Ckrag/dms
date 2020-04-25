@@ -7,16 +7,12 @@ from flask import abort
 from flask import make_response
 from flask import render_template
 from flask import request
-from flask_basicauth import BasicAuth
 
 from model.dms import DMS as DMS_APPLICATION
 
 app = Flask(__name__)
 
 # https://flask-basicauth.readthedocs.io/en/latest/
-app.config['BASIC_AUTH_USERNAME'] = 'admin'
-app.config['BASIC_AUTH_PASSWORD'] = 'Secret123'
-basic_auth = BasicAuth(app)
 
 # https://medium.com/@shamir.stav_83310/dockerizing-a-flask-mysql-app-with-docker-compose-c4f51d20b40d
 # http://flask.pocoo.org/docs/1.0/quickstart/#about-responses
@@ -28,7 +24,6 @@ DMS = DMS_APPLICATION()
 
 
 @app.route('/app/<string:app_id>', methods=['POST'])
-@basic_auth.required
 def receive_data(app_id: str) -> str or int:
     app_id = app_id.lower()
 
@@ -41,7 +36,6 @@ def receive_data(app_id: str) -> str or int:
 
 
 @app.route('/app/<string:app_id>', methods=['DELETE'])
-@basic_auth.required
 def delete_app(app_id: str) -> str or int:
     app_id = app_id.lower()
 
@@ -50,7 +44,6 @@ def delete_app(app_id: str) -> str or int:
 
 
 @app.route('/app/<string:app_id>', methods=['GET'])
-@basic_auth.required
 def show_app(app_id: str) -> str:
     app_data = DMS.on_app_requested(app_id)
 
@@ -64,7 +57,6 @@ def show_app(app_id: str) -> str:
 
 
 @app.route('/entries/<string:app_id>', methods=['GET'])
-@basic_auth.required
 def show_entries(app_id: str):
     app_id = app_id.lower()
 
@@ -75,7 +67,6 @@ def show_entries(app_id: str):
 
 
 @app.route('/apps', methods=['GET'])
-@basic_auth.required
 def show_apps():
     resp = make_response(DMS.on_apps_requested())
     resp.headers['Content-Type'] = 'application/json'
@@ -84,7 +75,6 @@ def show_apps():
 
 
 @app.route('/overview/', methods=['GET'])
-@basic_auth.required
 def overview():
     # TODO: We should not be parsing json around internally..redo this (and related tests)
     apps = [app_json['id'] for app_json in json.loads(DMS.on_apps_requested())]
@@ -92,7 +82,6 @@ def overview():
 
 
 @app.route('/overview/<string:app_id>', methods=['GET'])
-@basic_auth.required
 def detail(app_id: str):
     # TODO: We should not be parsing json around internally..redo this (and related tests)
 
