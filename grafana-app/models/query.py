@@ -66,7 +66,7 @@ class ResponseEntry:
     def as_time_series(self) -> dict:
         app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
 
-        data_points = [[data[2], data[1].timestamp() * 1000] for data in self._get_filtered(app_data)]
+        data_points = [[data[2], int(data[1].timestamp() * 1000)] for data in self._get_filtered(app_data)]
 
         # Filter data points
         # Ensure none bigger than large

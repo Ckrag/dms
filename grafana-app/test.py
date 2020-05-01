@@ -102,11 +102,11 @@ class ResponseTest(unittest.TestCase):
         expected = [
             {
                 'datapoints': [
-                    ['fu', 1577880000000],
-                    ['fu', 1577880000000],
-                    ['fu', 1577880000000],
-                    ['fu', 1577880000000],
-                    ['fu', 1577880000000]
+                    ['fu', 1577847600000],
+                    ['fu', 1577847600000],
+                    ['fu', 1577847600000],
+                    ['fu', 1577847600000],
+                    ['fu', 1577847600000]
                 ],
                 'target': 'fubar'
             }
@@ -147,11 +147,11 @@ class ResponseTest(unittest.TestCase):
                     },
                 ],
                 'rows': [
-                    ['the app', 1577880000000, 'fu'],
-                    ['the app', 1577880000000, 'fu'],
-                    ['the app', 1577880000000, 'fu'],
-                    ['the app', 1577880000000, 'fu'],
-                    ['the app', 1577880000000, 'fu']
+                    ['the app', 1577847600000, 'fu'],
+                    ['the app', 1577847600000, 'fu'],
+                    ['the app', 1577847600000, 'fu'],
+                    ['the app', 1577847600000, 'fu'],
+                    ['the app', 1577847600000, 'fu']
                 ],
             }
         ]
@@ -213,17 +213,14 @@ class ResponseJsonTest(unittest.TestCase):
                     }
                 ],
                 'rows': [
-                    ['the app', 1577880000000, 'bar', 2, 123.4],
-                    ['the app', 1577880000000, 'bar', 2, 123.4],
-                    ['the app', 1577880000000, 'bar', 2, 123.4],
-                    ['the app', 1577880000000, 'bar', 2, 123.4],
-                    ['the app', 1577880000000, 'bar', 2, 123.4]
+                    ['the app', 1577847600000, 'bar', 2, 123.4],
+                    ['the app', 1577847600000, 'bar', 2, 123.4],
+                    ['the app', 1577847600000, 'bar', 2, 123.4],
+                    ['the app', 1577847600000, 'bar', 2, 123.4],
+                    ['the app', 1577847600000, 'bar', 2, 123.4]
                 ],
             }
         ]
-        #print(expected)
-        #print("==============================")
-        #print(self.responder.query(q1))
         self.maxDiff = None
         self.assertEqual(expected, self.responder.query(q1))
 

@@ -37,6 +37,6 @@ PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -c 'CREATE DATABASE dms;'
 PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -d 'dms' -f $DIR_PATH/db/init.sql
 
 echo "Running tests"
-#python3 ./grafana-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
+python3 ./grafana-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
 python3 ./flask-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
 echo "Tests complete"
