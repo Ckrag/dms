@@ -10,13 +10,11 @@ services:
   grafana_server:
     build: grafana-app
     command: python app.py
-    #container_name: grafana_server <- not needed
     ports:
       - "6000:5000"
     depends_on:
       - flask_db
   grafana_ui:
-    #image: grafana/grafana:6.7.2
     build:
       context: .
       dockerfile: ./grafana-ui/Dockerfile
@@ -30,6 +28,9 @@ services:
       - flask_db
     ports:
       - "3000:3000" 
+    volumes:
+    # - ./mount/grafana:/var/lib/grafana
+     - grafana-storage:/var/lib/grafana
   flask_db:
     image: postgres:12.0
     restart: always
@@ -39,9 +40,9 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
       POSTGRES_DB: dms
-    #volumes:
-    #- ./data:/var/lib/postgresql/data/
-    #- ./db:/docker-entrypoint-initdb.d/:ro
+    volumes:
+     - ./mount/data:/var/lib/postgresql/data/
+    # - ./db:/docker-entrypoint-initdb.d/:ro
   liqui:
     depends_on:
       - flask_db
@@ -50,3 +51,5 @@ services:
       dockerfile: ./liquibase/Dockerfile
     links:
       - flask_db
+volumes:
+  grafana-storage:
