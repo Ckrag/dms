@@ -6,6 +6,7 @@ from flask import Flask
 from flask import abort
 from flask import make_response
 from flask import render_template
+from datetime import datetime
 from flask import request
 
 from model.dms import DMS as DMS_APPLICATION
@@ -26,8 +27,14 @@ DMS = DMS_APPLICATION()
 @app.route('/app/<string:app_id>', methods=['POST'])
 def receive_data(app_id: str) -> str or int:
     app_id = app_id.lower()
+    created = request.args.get('created', default=None)
+    if not isinstance(created, int):
+        abort(400)
 
-    rsp = DMS.on_data_received(app_id, request.data.decode("utf-8"), request.content_type)
+    rsp = DMS.on_data_received(
+        app_id, request.data.decode("utf-8"),
+        request.content_type, datetime.utcfromtimestamp(created)
+    )
 
     if rsp >= 400:
         abort(rsp)
@@ -85,9 +92,10 @@ def overview():
 def detail(app_id: str):
     # TODO: We should not be parsing json around internally..redo this (and related tests)
 
+    delimiter = request.args.get('delimiter', default='\n')
     entries = [entry['data'] for entry in json.loads(get_entries(app_id, request))]
 
-    return render_template('detail.html', app_entry_list=entries)
+    return render_template('detail.html', app_entry_list=entries, delimiter=delimiter)
 
 
 def get_entries(app_id: str, req):

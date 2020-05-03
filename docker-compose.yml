@@ -10,8 +10,8 @@ services:
   grafana_server:
     build: grafana-app
     command: python app.py
-    ports:
-      - "6000:5000"
+    #ports:
+    #  - "6000:5000"
     depends_on:
       - flask_db
   grafana_ui:

@@ -1,20 +1,14 @@
-import unittest
 from model.dms import DMS as DMS_APPLICATION
-from data import db_connection
 from test.base_test import BaseTest
 
 
 class DBTest(BaseTest):
 
-    def __init__(self, conn_str: str):
-        super().__init__()
-        self.conn_str = conn_str
-
     def test_receive_data(self):
         app_name = "my_app"
         app_entry = "my_app_entry"
 
-        dms = DMS_APPLICATION(self.conn_str)
+        dms = DMS_APPLICATION(self.get_db_conn())
 
         accept_type = dms._JSON
 
@@ -32,14 +26,8 @@ class DBTest(BaseTest):
 
         dms.on_app_delete(app_name)  # Uppercase to test we don't differ on case
 
-        self.assertEqual(len(dms.on_apps_requested()), 78)
+        self.assertEqual(len(dms.on_apps_requested()), 2)
 
-        self.assertEqual(len(dms.on_all_entries_requested(app_name)), 67)
+        self.assertEqual(len(dms.on_all_entries_requested(app_name)), 2)
 
-        self.assertEqual(len(dms.on_app_requested(app_name)), 76)
-
-    def setUp(self) -> None:
-        conn = db_connection.DBConnection(self.conn_str)
-        #with conn as conn:
-        #    conn.execute("DELETE FROM app_data")
-        #    conn.execute("DELETE FROM apps")
+        self.assertEqual(dms.on_app_requested(app_name), 404)

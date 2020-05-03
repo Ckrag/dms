@@ -1,6 +1,7 @@
 import json
 
 from data.data_store import DataStore
+from datetime import datetime
 
 
 class DMS:
@@ -14,7 +15,7 @@ class DMS:
     def __init__(self, db_connect_str: str = "postgresql://flask_db:5432/dms?user=root&password=root"):
         self._db_conn_str = db_connect_str
 
-    def on_data_received(self, app_id: str, payload: str, accept_type: str) -> int:
+    def on_data_received(self, app_id: str, payload: str, accept_type: str, created: datetime = None) -> int:
 
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         app_obj = db.get_app(app_id)
@@ -29,7 +30,7 @@ class DMS:
         if accept_type == self._BINARY:
             return 501
         else:
-            db.add_app_entry(app_id, entry_data)
+            db.add_app_entry(app_id, entry_data, created)
             return 200
 
     def on_apps_requested(self) -> str:

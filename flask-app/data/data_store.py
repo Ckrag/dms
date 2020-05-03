@@ -2,6 +2,7 @@ from typing import Optional
 
 from data.db_connection import DBConnection
 from model.model import App, Entry
+from datetime import datetime
 
 from sqlalchemy.sql import text
 
@@ -29,7 +30,7 @@ class DataStore:
     def delete_app(self, app_id: str):
         with self.conn as conn:
             conn.execute(
-                text(";DELETE FROM apps WHERE id=:app_id;"),
+                text("DELETE FROM apps WHERE id=:app_id"),
                 app_id=app_id
             )
 
@@ -63,16 +64,17 @@ class DataStore:
     def get_app_entries_limit_number(self, app_id: str, limit: int) -> []:
         with self.conn as conn:
             db_entries = conn.execute(
-                text("SELECT * FROM get_app_entries_with_number_limit(:id, :limit)"),
-                id=app_id, limit=limit
+                text("SELECT * FROM (SELECT * FROM app_data WHERE app_id=:app_id ORDER BY created DESC LIMIT :entries_limit) AS entries ORDER BY created ASC"),
+                id=app_id, entries_limit=limit
             ).fetchall()
             return list(map(lambda x: Entry.from_tuple(x), db_entries))
 
     def get_app_entries_limit_time(self, app_id: str, limit_min: int) -> []:
         with self.conn as conn:
             db_entries = conn.execute(
-                text("SELECT * FROM get_app_entries_with_time_limit(:id, :limit_min)"),
-                id=app_id, limit=limit_min
+                #text("SELECT * FROM get_app_entries_with_time_limit(:id, :limit_min)"),
+                text("SELECT * FROM app_data WHERE app_id=:app_id AND created > now() - INTERVAL '1 min' * :minute_limit"),
+                app_id=app_id, minute_limit=limit_min
             ).fetchall()
             return list(map(lambda x: Entry.from_tuple(x), db_entries))
 
@@ -84,9 +86,15 @@ class DataStore:
             ).fetchall()
             return list(map(lambda x: Entry.from_tuple(x), db_entries))
 
-    def add_app_entry(self, app_id: str, data: str):
+    def add_app_entry(self, app_id: str, data: str, created: datetime = None):
         with self.conn as conn:
-            conn.execute(
-                text("INSERT INTO app_data (app_id, txt) VALUES (:app_id, :entry_data)"),
-                app_id=app_id, entry_data=data
-            )
+            if not created:
+                conn.execute(
+                    text("INSERT INTO app_data (app_id, txt) VALUES (:app_id, :entry_data)"),
+                    app_id=app_id, entry_data=data
+                )
+            else:
+                conn.execute(
+                    text("INSERT INTO app_data (app_id, txt, created) VALUES (:app_id, :entry_data, :created)"),
+                    app_id=app_id, entry_data=data, created=created.utcnow()
+                )

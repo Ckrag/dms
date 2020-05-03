@@ -9,7 +9,7 @@
         {% if apps_list %}
             <ul>
             {% for app in apps_list %}
-                <li><a href="/overview/{{ app }}">{{ app }}</a></li>
+                <li><a href="/overview/{{ app|safe }}">{{ app|safe }}</a></li>
             {% endfor %}
             </ul>
         {% else %}

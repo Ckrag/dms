@@ -7,6 +7,8 @@ fi
 # Setup sql, later will be liquibase
 DIR_PATH=$1
 
+STALL=${2:-false}
+
 # REMEMBER TO: sudo apt install postgresql for pg_isready
 # https://www.postgresql.org/docs/9.3/app-pg-isready.html
 
@@ -36,7 +38,24 @@ while ! pg_isready -h 0.0.0.0 -p 9999 > /dev/null 2> /dev/null; do
 PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -c 'CREATE DATABASE dms;'
 PGPASSWORD=root psql -U root -p 9999 -h 0.0.0.0 -d 'dms' -f $DIR_PATH/db/init.sql
 
-echo "Running tests"
-python3 ./grafana-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
-python3 ./flask-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
-echo "Tests complete"
+#(export FOO=bar && somecommand someargs | somecommand2)
+
+CONN_STR="postgresql://0.0.0.0:9999/dms?user=root&password=root"
+
+export DMS_TEST_DB_STRING=$CONN_STR
+
+
+if [[ $STALL = true ]]
+then
+  echo "the env var is: DMS_TEST_DB_STRING=${CONN_STR}"
+  read -p "Press any key to end test session"
+else
+  echo "Running tests"
+	#python3 ./grafana-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
+	#python3 ./flask-app/test.py "postgresql://0.0.0.0:9999/dms?user=root&password=root"
+	(cd flask-app && python3 -m unittest discover test)
+	echo "Tests complete"
+fi
+
+
+unset DMS_TEST_DB_STRING
