@@ -53,9 +53,9 @@ class DBTest(BaseTest):
 
     def test_get_all_app_entries(self):
         self.database.create_app('app')
-        self.database.add_app_entry('add', '1')
-        self.database.add_app_entry('add', '2')
-        self.database.add_app_entry('add', '3')
+        self.database.add_app_entry('app', '1')
+        self.database.add_app_entry('app', '2')
+        self.database.add_app_entry('app', '3')
         entries = self.database.get_all_app_entries('app')
         self.assertEqual(len(entries), 3)
 
@@ -69,12 +69,12 @@ class DBTest(BaseTest):
 
     def test_get_app_entries_limit_time(self):
         self.database.create_app('app')
-        self.database.add_app_entry('app', '1', datetime.datetime(1, 1, 1))
-        self.database.add_app_entry('app', '2', datetime.datetime(1, 1, 1))
+        self.database.add_app_entry('app', '1', datetime.datetime(1990, 1, 1))
+        self.database.add_app_entry('app', '2', datetime.datetime(1990, 1, 1))
         self.database.add_app_entry('app', '3')
         entries = self.database.get_app_entries_limit_time('app', 1)
-        self.assertEqual(len(entries), 1)
-        self.assertEqual(entries[0].data, '1')
+        self.assertEqual(1, len(entries))
+        self.assertEqual(entries[0].data, '3')
 
     def setUp(self) -> None:
         super().setUp()

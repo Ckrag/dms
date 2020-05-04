@@ -65,7 +65,7 @@ class DataStore:
         with self.conn as conn:
             db_entries = conn.execute(
                 text("SELECT * FROM (SELECT * FROM app_data WHERE app_id=:app_id ORDER BY created DESC LIMIT :entries_limit) AS entries ORDER BY created ASC"),
-                id=app_id, entries_limit=limit
+                app_id=app_id, entries_limit=limit
             ).fetchall()
             return list(map(lambda x: Entry.from_tuple(x), db_entries))
 
@@ -88,13 +88,14 @@ class DataStore:
 
     def add_app_entry(self, app_id: str, data: str, created: datetime = None):
         with self.conn as conn:
-            if not created:
+            if created:
+                conn.execute(
+                    text("INSERT INTO app_data (app_id, txt, created) VALUES (:app_id, :entry_data, :created)"),
+                    app_id=app_id, entry_data=data, created=created
+                )
+            else:
                 conn.execute(
                     text("INSERT INTO app_data (app_id, txt) VALUES (:app_id, :entry_data)"),
                     app_id=app_id, entry_data=data
                 )
-            else:
-                conn.execute(
-                    text("INSERT INTO app_data (app_id, txt, created) VALUES (:app_id, :entry_data, :created)"),
-                    app_id=app_id, entry_data=data, created=created.utcnow()
-                )
+
