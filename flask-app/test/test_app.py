@@ -16,7 +16,9 @@ class DBTest(BaseTest):
 
         self.assertEqual(dms.on_app_requested(app_name), 404)
 
-        self.assertEqual(200, dms.on_data_received(app_name, app_entry, accept_type))
+        self.assertEqual(400, dms.on_data_received(app_name, app_entry, accept_type, 'fubar'))
+
+        self.assertEqual(200, dms.on_data_received(app_name, app_entry, accept_type), 123)
 
         self.assertEqual(len(dms.on_apps_requested()), 78)
 

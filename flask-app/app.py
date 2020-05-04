@@ -6,7 +6,6 @@ from flask import Flask
 from flask import abort
 from flask import make_response
 from flask import render_template
-from datetime import datetime
 from flask import request
 
 from model.dms import DMS as DMS_APPLICATION
@@ -27,13 +26,12 @@ DMS = DMS_APPLICATION()
 @app.route('/app/<string:app_id>', methods=['POST'])
 def receive_data(app_id: str) -> str or int:
     app_id = app_id.lower()
-    created = request.args.get('created', default=None)
-    if not isinstance(created, int):
-        abort(400)
 
     rsp = DMS.on_data_received(
-        app_id, request.data.decode("utf-8"),
-        request.content_type, datetime.utcfromtimestamp(created)
+        app_id,
+        request.data.decode("utf-8"),
+        request.content_type,
+        request.args.get('created', default=None)
     )
 
     if rsp >= 400:
@@ -83,19 +81,23 @@ def show_apps():
 
 @app.route('/overview/', methods=['GET'])
 def overview():
-    # TODO: We should not be parsing json around internally..redo this (and related tests)
     apps = [app_json['id'] for app_json in json.loads(DMS.on_apps_requested())]
     return render_template('index.html', apps_list=apps)
 
 
 @app.route('/overview/<string:app_id>', methods=['GET'])
 def detail(app_id: str):
-    # TODO: We should not be parsing json around internally..redo this (and related tests)
-
-    delimiter = request.args.get('delimiter', default='\n')
+    delimiter = request.args.get('delimiter', default='<br>')
     entries = [entry['data'] for entry in json.loads(get_entries(app_id, request))]
 
     return render_template('detail.html', app_entry_list=entries, delimiter=delimiter)
+
+
+@app.route('/data/<string:app_id>', methods=['GET'])
+def data(app_id: str):
+    return json.dumps({
+        "entries": get_entries(app_id, request)
+    })
 
 
 def get_entries(app_id: str, req):

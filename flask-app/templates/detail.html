@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <script src="https://d3js.org/d3.v5.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='site_detail.css') }}">
-        <title>App Overview</title>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='site_detail.css') }}">
+    <title>App Overview</title>
 
-    <body>
-        <div id="entries_container"></div>
-    </body>
-
-        <script>
-            // Get entries from backend into js
-            let entries = {{ app_entry_list|safe }};
-            let delimiter = {{ delimiter|safe }};
-
+    <script>
+        let entries = {{ app_entry_list|safe }};
+        let delimiter = "{{ delimiter|safe }}";
+        window.onload = function (e) {
             let container = document.getElementById("entries_container");
-            container.innerHTML = entries.join(delimiter);
-        </script>
+            container.innerHTML += entries.join(delimiter);
+        }
+
+    </script>
+
+</head>
+
+<body>
+<div id="entries_container">
+</div>
+</body>
+
 
 </html>
 
