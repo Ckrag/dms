@@ -1,6 +1,7 @@
 version: "3"
 services:
   dms_server:
+    restart: always
     build: flask-app
     command: python app.py
     ports:
@@ -8,6 +9,7 @@ services:
     depends_on:
       - flask_db
   grafana_server:
+    restart: always
     build: grafana-app
     command: python app.py
     #ports:
@@ -15,6 +17,7 @@ services:
     depends_on:
       - flask_db
   grafana_ui:
+    restart: always
     build:
       context: .
       dockerfile: ./grafana-ui/Dockerfile
