@@ -15,10 +15,13 @@ class DMS:
     def __init__(self, db_connect_str: str = "postgresql://flask_db:5432/dms?user=root&password=root"):
         self._db_conn_str = db_connect_str
 
-    def on_data_received(self, app_id: str, payload: str, accept_type: str, created: int = None) -> int:
+    def on_data_received(self, app_id: str, payload: str, accept_type: str, created: str = None) -> int:
 
-        if created and not isinstance(created, int):
-            return 400
+        if created:
+            try:
+                created = float(created)
+            except ValueError:
+                return 400
 
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         app_obj = db.get_app(app_id)
