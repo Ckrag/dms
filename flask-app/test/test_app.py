@@ -1,3 +1,5 @@
+import json
+
 from model.dms import DMS as DMS_APPLICATION
 from test.base_test import BaseTest
 
@@ -33,3 +35,4 @@ class DBTest(BaseTest):
         self.assertEqual(len(dms.on_all_entries_requested(app_name)), 2)
 
         self.assertEqual(dms.on_app_requested(app_name), 404)
+        dms.on_config_update(app_name, json.dumps({'data_series_var': 'my_var'}))

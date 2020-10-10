@@ -23,7 +23,10 @@ class DBTest(BaseTest):
         database.add_app_entry(app_name_one, "my first entry")
         self.assertTrue(database.get_all_app_entries(app_name_one))
 
-        self.assertEqual(1, len(database.get_apps()))
+        apps = database.get_apps()
+        self.assertEqual(1, len(apps))
+        config = database.get_config(apps[0].app_id)
+        self.assertIsNone(config['data_series_var'])
 
         self.assertEqual(
             App(app_name_one, "some description", datetime.datetime.now()).app_id,
@@ -40,6 +43,12 @@ class DBTest(BaseTest):
         self.assertEqual(0, len(database.get_apps()))
 
         self.assertFalse(database.get_all_app_entries(app_name_one))
+
+    def test_apply_and_get_config(self):
+        database = self.database
+        database.create_app('an_app', "This dms is great!")
+        database.apply_config('an_app', {'data_series_var': 'a_b_c'})
+        self.assertEqual('a_b_c', database.get_config('an_app')['data_series_var'])
 
     def test_create_app_and_write_data_entry(self):
         database = self.database

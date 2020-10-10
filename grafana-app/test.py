@@ -9,6 +9,7 @@ from db_connection import DBConnection
 from models.query import Query
 from models.query import ResponseEntry
 from repository import data_store
+from repository.data_store import DataStore
 from responder import Responder
 
 
@@ -26,6 +27,10 @@ class DatastoreTest(unittest.TestCase):
         entries = self.data_store.get_app_data('the app')
         self.assertEqual(1, len(entries))
         self.assertEqual([['the app', datetime.datetime(1970, 1, 1, 0, 0, 2), 'fu']], entries)
+
+    def test_get_data_series_var(self) -> None:
+        self.assertEqual('the var', self.data_store.get_data_series_var('the app'))
+        self.assertEqual(None, self.data_store.get_data_series_var('the other app'))
 
     def test_get_app_data_for_interval(self) -> None:
         with self.conn as conn:
@@ -67,6 +72,8 @@ class DatastoreTest(unittest.TestCase):
         with self.conn as conn:
             conn.execute("insert into apps (id, description) values ('the app', 'desc of test app')")
             conn.execute("insert into apps (id, description) values ('the other app', 'desc of the other app')")
+            conn.execute("insert into app_config (app_id, data_series_var) values ('the app', 'the var')")
+            conn.execute("insert into app_config (app_id) values ('the other app')")
             conn.execute("insert into app_data (app_id, created, txt) values ('the app', '1970-01-01 00:00:02', 'fu')")
             conn.execute(
                 "insert into app_data (app_id, created, txt) values ('the other app', '1970-01-01 00:00:01','bar')")
@@ -166,6 +173,52 @@ class ResponseTest(unittest.TestCase):
             ('the app', datetime.datetime(2020, 1, 1, 4), 'fu'),
             ('the app', datetime.datetime(2020, 1, 1, 4), 'fu')
         ]
+        self.ds.get_data_series_var.return_value = None
+        self.responder = Responder(self.ds)
+
+
+class ResponseTableAsTimeSeriesTest(unittest.TestCase):
+
+    def test_query_for_timeserie_on_json_payload(self) -> None:
+        hour_in_ms = 3600000
+        q1 = Query({
+            'intervalMs': hour_in_ms,
+            'targets': [
+                {
+                    'target': 'fubar',
+                    'type': 'timeserie'
+                }
+            ],
+            'maxDataPoints': 5,
+            'range': {
+                'from': "2020-01-01T12:00:00.000Z",
+                'to': "2020-01-04T12:00:00.000Z"
+            }
+        })
+        expected = [
+            {
+                'datapoints': [
+                    ['val', 1577847600000],
+                    ['val', 1577847600000],
+                    ['val', 1577847600000],
+                    ['val', 1577847600000],
+                    ['val', 1577847600000]
+                ],
+                'target': 'fubar'
+            }
+        ]
+        self.assertEqual(expected, self.responder.query(q1))
+
+    def setUp(self) -> None:
+        self.ds = Mock()
+        self.ds.get_app_data.return_value = [
+            ('the app', datetime.datetime(2020, 1, 1, 4), '{"a": {"b": "val"} }'),
+            ('the app', datetime.datetime(2020, 1, 1, 4), '{"a": {"b": "val"} }'),
+            ('the app', datetime.datetime(2020, 1, 1, 4), '{"a": {"b": "val"} }'),
+            ('the app', datetime.datetime(2020, 1, 1, 4), '{"a": {"b": "val"} }'),
+            ('the app', datetime.datetime(2020, 1, 1, 4), '{"a": {"b": "val"} }')
+        ]
+        self.ds.get_data_series_var.return_value = 'a.b'
         self.responder = Responder(self.ds)
 
 
@@ -294,6 +347,12 @@ class QueryTest(unittest.TestCase):
         }
         q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)
         self.assertEqual(exp, q._key_vals_to_path_vals(data, '.'))
+
+    def test_path_val_from_dict(self):
+        q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)
+        self.assertEqual('1', q._path_val_from_dict('a.b.c', {'a': {'b': {'c': '1'}}}))
+        self.assertEqual('2', q._path_val_from_dict('a.b', {'a': {'b': 2}}))
+        self.assertEqual('3', q._path_val_from_dict('a', {'a': 3}))
 
     def test_is_json(self):
         q = ResponseEntry(Mock(), 'bob', 0, 0, 0, 4)

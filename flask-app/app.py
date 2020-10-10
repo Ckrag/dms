@@ -40,6 +40,15 @@ def receive_data(app_id: str) -> str or int:
         return "{} entry added".format(app_id)  # 200
 
 
+@app.route('/app/<string:app_id>/config', methods=['POST'])
+def configure(app_id: str) -> str or int:
+    rsp = DMS.on_config_update(app_id.lower(), request.data.decode("utf-8"))
+    if rsp >= 400:
+        abort(rsp)
+    else:
+        return f"Configuration applied for {app_id.lower()}"
+
+
 @app.route('/app/<string:app_id>', methods=['DELETE'])
 def delete_app(app_id: str) -> str or int:
     app_id = app_id.lower()

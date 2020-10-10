@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Connection
+import sqlalchemy.engine
 
 
 class DBConnection:
@@ -8,7 +8,7 @@ class DBConnection:
         self.engine = create_engine(config)
         self.active_conn = None
 
-    def __enter__(self) -> Connection:
+    def __enter__(self) -> sqlalchemy.engine.Connection:
         self.active_conn = self.engine.connect()
         return self.active_conn
 

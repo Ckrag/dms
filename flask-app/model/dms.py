@@ -67,3 +67,14 @@ class DMS:
         db = DataStore(DataStore.get_db_connection(self._db_conn_str))
         db.delete_app(app_id)
         return 204
+
+    def on_config_update(self, app_id: str, config: str) -> int:
+        """
+        Config params: data_series_var,
+        :param app_id:
+        :param config:
+        :return:
+        """
+        db = DataStore(DataStore.get_db_connection(self._db_conn_str))
+        db.apply_config(app_id, json.loads(config))
+        return 201

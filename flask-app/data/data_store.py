@@ -26,6 +26,10 @@ class DataStore:
                 text("INSERT INTO apps (id, description) VALUES (:app_id, :app_desc) ON CONFLICT(id) DO NOTHING;"),
                 app_id=app_id, app_desc=description
             )
+            conn.execute(
+                text("INSERT INTO app_config (app_id, data_series_var) VALUES (:app_id, null) ON CONFLICT(app_id) DO NOTHING;"),
+                app_id=app_id
+            )
 
     def delete_app(self, app_id: str):
         with self.conn as conn:
@@ -33,6 +37,21 @@ class DataStore:
                 text("DELETE FROM apps WHERE id=:app_id"),
                 app_id=app_id
             )
+
+    def apply_config(self, app_id: str, config: dict):
+        with self.conn as conn:
+            for k, v in config.items():
+                conn.execute(
+                    text(f"UPDATE app_config SET {k}=:v WHERE app_id=:app_id"),
+                    v=v, app_id=app_id
+                )
+
+    def get_config(self, app_id: str) -> dict:
+        with self.conn as conn:
+            return conn.execute(
+                text("SELECT * FROM app_config WHERE app_id=:app_id"),
+                app_id=app_id
+            ).fetchone()
 
     def exists(self, app_id: str) -> bool:
         return app_id in self.get_apps()

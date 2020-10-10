@@ -4,13 +4,31 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
- 
+
  	<changeSet id="1" author="Claus">
 		<preConditions onFail="MARK_RAN">
 			<not>
 				<tableExists tableName="apps" schemaName="public"/>
 			</not>
 		</preConditions>
-          	<sqlFile dbms="postgresql" relativeToChangelogFile="true" path="../db/init.sql" splitStatements="false"/>
+          	<sqlFile
+                    dbms="postgresql"
+                    relativeToChangelogFile="true"
+                    path="../db/1_init.sql"
+                    splitStatements="false"
+            />
 	</changeSet>
+    <changeSet id="2" author="Claus">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="app_config" schemaName="public"/>
+            </not>
+        </preConditions>
+        <sqlFile
+                dbms="postgresql"
+                relativeToChangelogFile="true"
+                path="../db/2_config.sql"
+                splitStatements="false"
+        />
+    </changeSet>
 </databaseChangeLog>

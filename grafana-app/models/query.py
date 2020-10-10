@@ -65,8 +65,19 @@ class ResponseEntry:
 
     def as_time_series(self) -> dict:
         app_data = self.data_store.get_app_data(self.name, self.interval_from, self.interval_to)
+        var = self.data_store.get_data_series_var(self.name)
 
-        data_points = [[data[2], int(data[1].timestamp() * 1000)] for data in self._get_filtered(app_data)]
+        if var is None:
+            data_points = [[data[2], int(data[1].timestamp() * 1000)] for data in self._get_filtered(app_data)]
+        else:
+            data_points = []
+            filtered_data = self._get_filtered(app_data)
+
+            for data in filtered_data:
+                if not self._is_json(data[2]):
+                    raise ValueError("Expected pathed payload, but payload not json")
+                entry = self._path_val_from_dict(var, json.loads(data[2]))
+                data_points.append([entry, int(data[1].timestamp() * 1000)])
 
         # Filter data points
         # Ensure none bigger than large
@@ -201,3 +212,9 @@ class ResponseEntry:
                 n_base = '' if len(base) == 0 else base + delimiter
                 paths[n_base + str(k)] = v
         return paths
+
+    def _path_val_from_dict(self, path: str, entry: dict, delimiter='.') -> str:
+        last_entry = entry
+        for path in path.split(delimiter):
+            last_entry = last_entry[path]
+        return str(last_entry)

@@ -42,7 +42,8 @@ while ! pg_isready -h $DB_HOST -p $DB_PORT > /dev/null 2> /dev/null; do
 
 # build DB
 PGPASSWORD=$DB_PASS psql -U $DB_USER -p $DB_PORT -h $DB_HOST -c "CREATE DATABASE $DB_SCHEMA;"
-PGPASSWORD=$DB_PASS psql -U $DB_USER -p $DB_PORT -h $DB_HOST -d $DB_SCHEMA -f $DIR_PATH/db/init.sql
+PGPASSWORD=$DB_PASS psql -U $DB_USER -p $DB_PORT -h $DB_HOST -d $DB_SCHEMA -f $DIR_PATH/db/1_init.sql
+PGPASSWORD=$DB_PASS psql -U $DB_USER -p $DB_PORT -h $DB_HOST -d $DB_SCHEMA -f $DIR_PATH/db/2_config.sql
 
 #(export FOO=bar && somecommand someargs | somecommand2)
 

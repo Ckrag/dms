@@ -42,3 +42,5 @@ curl -X POST -H "Content-Type: text/plain" --data 40 -u admin:Secret123 0.0.0.0:
 sleep 1
 curl -X POST -H "Content-Type: text/plain" --data 80 -u admin:Secret123 0.0.0.0:5000/app/my_app_simple
 sleep 1
+
+curl -X POST -H "Content-Type: text/plain" --data '{"data_series_var": "bob"}' -u admin:Secret123 0.0.0.0:5000/app/my_app_json/config
