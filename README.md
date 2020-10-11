@@ -53,6 +53,22 @@ allowing fancy timeseries-graphs from pushed JSON
 From here, data that is pushed under new app-names automatically
 appear as metrics.
 
+<h2>REST Api</h2>
+Post data
+
+- Creates app on first push
+```
+curl -X POST -H "Content-Type: text/plain" --data "<DATA>" <URL>/app/<APP_NAME>
+```
+Configure app
+```
+curl -X POST -H "Content-Type: text/plain" --data '{"data_series_var": "<PROPERTY_PATH>"}' <URL>/app/<APP_NAME>/config
+```
+Delete app
+```
+curl -X DELETE <URL>/app/<APP_NAME>
+```
+
 <h2>Development</h2>
 _Remember to set a data-folder for the postgres volume to mount!_
 
