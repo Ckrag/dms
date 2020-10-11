@@ -1,7 +1,7 @@
 <h1>DMS</h1>
 
 Simple datastore for arbitrary data, fronted by grafana.
-While Grafana fetches the data normally, this makes it easy for
+While [Grafana](https://grafana.com) fetches the data normally, this makes it easy for
 applications to push their own data. Allows setting a custom 'received time'
 to either push old data or later push data when internet might be available.
 
