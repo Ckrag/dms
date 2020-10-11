@@ -13,6 +13,7 @@ curl -X POST -H "Content-Type: text/plain" --data "<DATA>" <URL>/app/<APP_NAME>
 Note: Optionally `?created=<UNIX_TIME>` can store the entry as received
 at certain time.
 <h2>Running locally</h2>
+
 ```
 ./rb.sh (runs setup as docker-compose)
 ./seed_dms.sh (for some initial test data)
@@ -55,6 +56,7 @@ appear as metrics.
 <h2>Development</h2>
 _Remember to set a data-folder for the postgres volume to mount!_
 Run tests (requires python dependencies available):
+
 ```
-./test.sh $(pwd)
+./test.sh $(<project_root_path>)
 ```
