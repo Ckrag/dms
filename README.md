@@ -18,7 +18,8 @@ at certain time.
 ./rb.sh (runs setup as docker-compose)
 ./seed_dms.sh (for some initial test data)
 ```
-Navigate to http://0.0.0.0:3000, follow Grafana setup.
+Navigate to http://0.0.0.0:3000, follow Grafana setup. (The underlaying API serves from http://0.0.0.0:5000)
+
 Use the SimpleJson datasource as follows:
 
 ![json data source](README/data_source.png "Datasource")
