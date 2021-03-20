@@ -1,7 +1,7 @@
 sqlalchemy
 Flask==1.0.2
 Flask-BasicAuth==0.2.0
-Jinja2==2.10
+Jinja2==2.11.3
 pluggy==0.7.1
 psycopg2==2.7.5
 psycopg2-binary==2.7.5
